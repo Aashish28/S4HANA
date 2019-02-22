@@ -1,0 +1,20 @@
+*&---------------------------------------------------------------------*
+*& Report  ZREST_FIORI_PERSO
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+REPORT zrest_fiori_perso.
+
+TABLES : /ui2/cache , wdy_conf_usert. ",wdy_conf_usert2 "wdy_conf_user,.
+
+DELETE FROM /ui2/cache WHERE usr = 'Z003N76U'.
+
+DELETE FROM wdy_conf_udef WHERE WDUSER = 'Z003N76U'.
+
+DELETE FROM wdy_conf_usert WHERE WDUSER = 'Z003N76U'.
+
+DELETE FROM wdy_conf_usert2 WHERE WDUSER = 'Z003N76U'.
+
+DELETE FROM wdy_conf_user WHERE WDUSER = 'Z003N76U'.
