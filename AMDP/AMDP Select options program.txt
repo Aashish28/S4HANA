@@ -1,0 +1,28 @@
+REPORT z_amdp.
+
+TYPES: BEGIN OF ty_tab,
+         matnr TYPE matnr,
+         maktx TYPE maktx,
+       END OF ty_tab,
+       tt_tab TYPE TABLE OF ty_tab,
+       tt_makt TYPE TABLE OF makt.
+data: ty_matnr TYPE mara-matnr.
+DATA: t_tab TYPE tt_tab.
+DATA: t_makt TYPE tt_makt.
+
+SELECT-OPTIONS: s_matnr for ty_matnr.
+
+START-OF-SELECTION.
+  " Select data and then apply filter
+  NEW zcl_user_role_amdp( )->my_first_amdp( EXPORTING iv_langu = sy-langu
+                                                      iv_filter = cl_shdb_seltab=>combine_seltabs(
+                                                      it_named_seltabs = value #( ( name = 'MATNR' dref = ref #( s_matnr[] ) ) )  )
+                                            IMPORTING et_table = t_tab ).
+ " Apply filter directly on selection but only on one table
+  NEW zcl_user_role_amdp( )->my_second_amdp( EXPORTING iv_langu = sy-langu
+                                                      iv_filter = cl_shdb_seltab=>combine_seltabs(
+                                                      it_named_seltabs = value #( ( name = 'MATNR' dref = ref #( s_matnr[] ) ) )  )
+                                            IMPORTING et_table = t_makt ).
+
+  cl_demo_output=>display( t_tab ).
+  cl_demo_output=>display( t_makt ).

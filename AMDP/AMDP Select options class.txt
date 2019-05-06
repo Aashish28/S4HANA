@@ -1,0 +1,30 @@
+CLASS zcl_user_role_amdp DEFINITION PUBLIC FINAL CREATE PUBLIC.
+  PUBLIC SECTION.
+    INTERFACES: if_amdp_marker_hdb.
+    TYPES: BEGIN OF ty_tab,
+             matnr TYPE matnr,
+             maktx TYPE maktx,
+           END OF ty_tab,
+           tt_tab TYPE TABLE OF ty_tab,
+           tt_makt TYPE TABLE OF makt.
+    METHODS: my_first_amdp IMPORTING VALUE(iv_langu)  TYPE spras
+                                     VALUE(iv_filter) TYPE string
+                           EXPORTING VALUE(et_table)  TYPE tt_tab,
+             my_second_amdp IMPORTING VALUE(iv_langu)  TYPE spras
+                                      VALUE(iv_filter) TYPE string
+                            EXPORTING VALUE(et_table)  TYPE tt_makt.
+ENDCLASS.
+
+CLASS zcl_user_role_amdp IMPLEMENTATION.
+  METHOD my_first_amdp BY DATABASE PROCEDURE FOR HDB LANGUAGE SQLSCRIPT USING mara makt.
+    et_table = SELECT a.matnr, b.maktx
+    from mara as a inner join makt as b
+    on a.matnr = b.matnr
+    WHERE b.spras = :iv_langu;
+    et_table = apply_filter( :et_table, :iv_filter );
+  ENDMETHOD.
+  METHOD my_second_amdp BY DATABASE PROCEDURE FOR HDB LANGUAGE SQLSCRIPT USING makt.
+    et_table = apply_filter( makt, :iv_filter );
+  ENDMETHOD.
+
+ENDCLASS.
