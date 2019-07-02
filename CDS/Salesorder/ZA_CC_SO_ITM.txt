@@ -1,0 +1,86 @@
+@AbapCatalog.sqlViewName: 'ZA_CS_SO_ITM'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Sales order item consumption'
+@VDM.viewType: #CONSUMPTION
+@Metadata: {
+    allowExtensions: true
+}
+@ObjectModel: {
+   semanticKey:['salesorder', 'salesorderitem'],
+   createEnabled: true,
+   deleteEnabled: true,
+   updateEnabled: true
+}
+
+define view ZA_CC_SO_ITM as select from ZA_IC_SO_ITM 
+association [1..1] to ZA_CC_SO_HDR as _header on _header.salesorder = $projection.salesorder
+    {
+
+@UI.facet: [
+        { 
+            label: 'Sales Item Info',
+            id: 'ItemInfo',
+            purpose: #STANDARD,
+            type: #COLLECTION,
+            position: 10
+        },
+        {
+            label: 'Material Info',
+            id : 'MaterialInfo',
+            purpose: #STANDARD,
+            parentId : 'ItemInfo',
+            type : #IDENTIFICATION_REFERENCE,
+            targetQualifier : 'MaterialInfo',
+            position: 20
+        }
+        ]
+
+
+    //ZA_IC_SO_ITM 
+@UI.hidden: true    
+key salesorder, 
+ @UI: {
+        lineItem: [{position : 10 , label: 'Sales Order Item', importance: #HIGH }], 
+        identification:[ { position: 10, label: 'Sales Order Item' }],
+        fieldGroup: [{qualifier: 'MaterialInfo', position: 10, importance: #HIGH }]
+ } 
+key salesorderitem, 
+ @UI: {
+        lineItem: [{position : 20 , label: 'Material', importance: #HIGH }], 
+        identification:[ { position: 20, label: 'Material' }],
+        fieldGroup: [{qualifier: 'MaterialInfo', position: 20, importance: #HIGH }]
+ } 
+    material, 
+ @UI.hidden: true  
+    itemtype, 
+ @UI: {
+        lineItem: [{position : 30 , label: 'Quantity', importance: #HIGH }], 
+        identification:[ { position: 30, label: 'Quantity' } ],
+        fieldGroup: [{qualifier: 'MaterialInfo', position: 30, importance: #HIGH }]
+ }    
+    quantity,  
+ @UI: {
+        identification:[ { position: 40, label: 'Uom' } ],
+        fieldGroup: [{qualifier: 'MaterialInfo', position: 40, importance: #HIGH }]
+ }        
+    uom, 
+ @UI: {
+        lineItem: [{position : 50 , label: 'Amount', importance: #HIGH }], 
+        identification:[ { position: 50, label: 'Amount' } ],
+        fieldGroup: [{qualifier: 'MaterialInfo', position: 50, importance: #HIGH }]
+ }        
+    amount, 
+    currency, 
+    @ObjectModel: {
+          association: {
+              type: [ #TO_COMPOSITION_PARENT, #TO_COMPOSITION_ROOT ]
+          }
+      }
+    /* Associations */ 
+    _header, 
+    _materials,
+    _currency,
+    _unitOfMeasure
+}

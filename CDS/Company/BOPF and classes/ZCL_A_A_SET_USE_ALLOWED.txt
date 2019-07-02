@@ -1,0 +1,54 @@
+class ZCL_A_A_SET_USE_ALLOWED definition
+  public
+  inheriting from /BOBF/CL_LIB_A_SUPERCL_SIMPLE
+  final
+  create public .
+
+public section.
+
+  methods /BOBF/IF_FRW_ACTION~EXECUTE
+    redefinition .
+protected section.
+private section.
+ENDCLASS.
+
+
+
+CLASS ZCL_A_A_SET_USE_ALLOWED IMPLEMENTATION.
+
+
+  method /BOBF/IF_FRW_ACTION~EXECUTE.
+
+    " Typed with node's combined table type
+  DATA: lt_data TYPE ZTAIC_COMPANY,
+        lv_field type string VALUE 'ReadyToUse' .
+
+  " READING BO data ----------------------------------------------
+
+  " Retrieve the data of the requested node instance
+  io_read->retrieve(
+    EXPORTING
+    iv_node         = is_ctx-node_key
+    it_key          = it_key
+    IMPORTING
+    et_data         = lt_data
+  ).
+
+  " WRITING BO data ---------------------------------------------
+
+  LOOP AT lt_data ASSIGNING FIELD-SYMBOL(<s_data>).
+  " Set readyto use
+  <s_data>-READYTOUSE = ABAP_TRUE.
+
+  io_modify->update(
+    EXPORTING
+    iv_node               = is_ctx-node_key
+    iv_key                = <s_data>-key
+    iv_root_key           = <s_data>-root_key
+    is_data               = REF #( <s_data> )
+    it_changed_fields     = VALUE #( ( lv_field ) )
+    ).
+  ENDLOOP.
+
+  endmethod.
+ENDCLASS.

@@ -1,0 +1,49 @@
+@Metadata.layer: #CUSTOMER
+
+@UI: {
+    headerInfo: {
+    typeName: 'Company',
+    typeNamePlural: 'Companies',
+    title: { type: #STANDARD, label: 'Company Maintenance', value: 'Company'},
+    description: {  label: 'Company name', value: 'CompanyName' }
+    }
+}
+
+@UI.selectionVariant: [{ qualifier: 'Approved', text: 'Approved' , filter:'ReadyToUse EQ "X"'},
+                       { qualifier: 'NotApproved', text: 'Not Approved' , filter:'ReadyToUse EQ ""'}
+                      ]
+
+annotate view ZA_CC_COMPANY
+    with 
+{   
+
+    @UI.facet: [{ purpose: #QUICK_VIEW , type : #FIELDGROUP_REFERENCE , qualifier: 'CompanyFieldGroup' }]
+    
+    @UI: {
+        lineItem: [{position : 10 , label: 'Company', importance: #HIGH }, 
+          { type: #FOR_ACTION, position: 1, dataAction: 'BOPF:SET_USE_ALLOWED', label: 'Ready to use', importance: #HIGH }
+        ], 
+        selectionField: [ { position: 10 } ],
+        identification:[ { position: 10, label: 'Company Id' } ],   
+        fieldGroup: [{ qualifier: 'CompanyFieldGroup' , position: 10 }]
+    } 
+    Company; 
+    @UI: {
+      lineItem: [ { position: 20, label: 'Company Name', importance: #HIGH }],
+      identification:[ { position: 20, label: 'Company Name' } ],
+      fieldGroup: [{ qualifier: 'CompanyFieldGroup' , position: 20 }]
+    }
+    CompanyName;    
+    @UI: {
+      lineItem: [ { position: 30, label: 'Industry Type', importance: #HIGH } ],
+      identification:[ { position: 30, label: 'Industry Type' } ],
+      selectionField: [ { position: 20 } ],
+      fieldGroup: [{ qualifier: 'CompanyFieldGroup' , position: 30 }]
+    }
+    IndustryType;
+
+    @UI: {
+      lineItem: [ { position: 40, label: 'Ready To Use', importance: #HIGH } ]
+    }
+    ReadyToUse;
+}

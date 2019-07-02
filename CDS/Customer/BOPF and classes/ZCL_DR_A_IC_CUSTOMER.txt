@@ -1,0 +1,103 @@
+class ZCL_DR_A_IC_CUSTOMER definition
+  public
+  inheriting from /BOBF/CL_LIB_DR_CLASSIC_APP
+  final
+  create public .
+
+public section.
+
+  methods /BOBF/IF_FRW_DRAFT~COPY_DRAFT_TO_ACTIVE_ENTITY
+    redefinition .
+protected section.
+private section.
+ENDCLASS.
+
+
+
+CLASS ZCL_DR_A_IC_CUSTOMER IMPLEMENTATION.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Public Method ZCL_DR_A_IC_CUSTOMER->/BOBF/IF_FRW_DRAFT~COPY_DRAFT_TO_ACTIVE_ENTITY
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] IS_CTX                         TYPE        /BOBF/S_FRW_CTX_DRAFT
+* | [--->] IT_DRAFT_KEY                   TYPE        /BOBF/T_FRW_KEY
+* | [--->] IO_READ                        TYPE REF TO /BOBF/IF_FRW_READ
+* | [--->] IO_MODIFY                      TYPE REF TO /BOBF/IF_FRW_MODIFY
+* | [<---] EO_MESSAGE                     TYPE REF TO /BOBF/IF_FRW_MESSAGE
+* | [<---] ET_KEY_LINK                    TYPE        /BOBF/T_FRW_KEY_LINK_ACT_DRAFT
+* | [<---] ET_FAILED_DRAFT_KEY            TYPE        /BOBF/T_FRW_KEY
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  METHOD /bobf/if_frw_draft~copy_draft_to_active_entity.
+
+    DATA:
+            ls_msg TYPE symsg.
+    " Get the message container, to push any messages to the UI if requred
+    IF eo_message IS NOT BOUND.
+      eo_message = /bobf/cl_frw_message_factory=>create_container( ).
+    ENDIF.
+    " header and items data declaration
+    DATA(lt_customer) = VALUE ztaic_customer1( ).
+
+    "Read Header Data
+    "Pass the node key, which tells if we are trying to read header or item, in this case header
+    "Pass the draft keys, if we create an entry in the Fiori, they will be saved as draft intitial, those keys we will pass to get the data
+    io_read->retrieve(
+      EXPORTING
+        iv_node       = zif_a_ic_customer1_c=>sc_node-za_ic_customer
+        it_key        = it_draft_key
+        iv_fill_data = abap_true
+      IMPORTING
+        et_data       = lt_customer
+    ).
+
+    " Always 1 header only expected as we can only create one sales order at a time
+    DATA(ls_customer_raw) = CORRESPONDING ZSAIC_CUSTOMER1_D( lt_customer[ 1 ] ).
+
+    DATA ls_customer TYPE ZSA_T_CUSTOMER.
+
+    ls_customer = CORRESPONDING #( ls_customer_raw MAPPING kunnr = customer
+                                                           land1 = country
+                                                           custname = customername
+                                                           city = city
+                                                           custtype = customertype ).
+
+    " Updating the header
+    " I am checking if the sales order number is initial, it means it is the new entry
+    " Else it is an existing entry
+    " Alternatively we can also use lt_header[ 1 ]-HASACTIVEENTRY, which will tell if the active entry is available
+    " If the active entry is available means it is update sceanrio else it is create scenario
+    IF ls_customer-kunnr IS NOT INITIAL.
+     get TIME STAMP FIELD ls_customer-changedat.
+     ls_customer-changedby = sy-uname.
+      MODIFY ZSA_T_CUSTOMER FROM ls_customer.
+    ELSE.
+        SELECT COUNT(*) FROM ZSA_T_CUSTOMER into @data(lv_count).
+
+      ls_customer-kunnr = lv_count + 1.
+      CONDENSE ls_customer-kunnr.
+
+      call FUNCTION 'CONVERSION_EXIT_ALPHA_INPUT'
+        EXPORTING
+          input  = ls_customer-kunnr
+        IMPORTING
+          output = ls_customer-kunnr
+        .
+      get TIME STAMP FIELD ls_customer-createdat.
+      ls_customer-createdby = sy-uname.
+      INSERT ZSA_T_CUSTOMER FROM ls_customer.
+    ENDIF.
+
+    " Now we need to tell the BOPF framework to delete the draft entries as we have successfully created the data in the DB
+    " But BOPF only understands the data in in GUIDs, so we need to convert the sales order number to BOPF key, we just need to parent key
+    DATA(lr_key_util) = /bobf/cl_lib_legacy_key=>get_instance( zif_a_ic_customer1_c=>sc_bo_key ).
+
+    DATA(lv_bobf_key) = lr_key_util->convert_legacy_to_bopf_key(
+                            iv_node_key   = zif_a_ic_customer1_c=>sc_node-za_ic_customer
+                            is_legacy_key = ls_customer-kunnr ).
+
+    APPEND VALUE #( draft = it_draft_key[ 1 ]-key active = lv_bobf_key ) TO et_key_link.
+
+
+  ENDMETHOD.
+ENDCLASS.

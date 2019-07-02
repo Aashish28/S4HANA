@@ -1,0 +1,34 @@
+@AbapCatalog.sqlViewName: 'ZSA_BS_CUSTOMER'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Customer CDS Base'
+@VDM.viewType: #TRANSACTIONAL
+
+@Search.searchable: true
+
+define view ZA_BC_CUSTOMER as select from zsa_t_customer {
+    //zsa_t_customer 
+    @EndUserText.label: 'Customer'
+    @EndUserText.quickInfo: 'Customer'
+    @Search.defaultSearchElement: true
+    @Search.fuzzinessThreshold: 0.8    
+  key  kunnr, 
+       land1, 
+    @Semantics.text: true -- identifies the text field
+    @Search.defaultSearchElement: true
+    @Search.fuzzinessThreshold: 0.8    
+    @EndUserText.label: 'Customer Name'
+    @EndUserText.quickInfo: 'Customer Name'
+       custname, 
+       city, 
+       custtype,
+       @UI.hidden: true
+       changedat, 
+       @UI.hidden: true
+       changedby, 
+       @UI.hidden: true
+       createdby, 
+       @UI.hidden: true
+       createdat    
+}

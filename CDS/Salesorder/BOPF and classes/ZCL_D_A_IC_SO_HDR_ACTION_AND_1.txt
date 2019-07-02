@@ -1,0 +1,99 @@
+class ZCL_D_A_IC_SO_HDR_ACTION_AND_1 definition
+  public
+  inheriting from /BOBF/CL_LIB_D_SUPERCL_SIMPLE
+  final
+  create public .
+
+public section.
+
+  methods /BOBF/IF_FRW_DETERMINATION~EXECUTE
+    redefinition .
+protected section.
+private section.
+ENDCLASS.
+
+
+
+CLASS ZCL_D_A_IC_SO_HDR_ACTION_AND_1 IMPLEMENTATION.
+
+
+  method /BOBF/IF_FRW_DETERMINATION~EXECUTE.
+
+
+    DATA(lt_hdr) = VALUE ztaic_so_hdr1( ).
+
+
+    DATA lv_action_enabled TYPE abap_bool.
+
+    " (1) Retrieve the data of the invoice's node instance
+    io_read->retrieve(
+      EXPORTING
+        iv_node  = is_ctx-node_key
+        it_key   = it_key
+      IMPORTING
+        et_data = lt_hdr ).
+
+
+    " (2) Create a property helper object
+    DATA lo_property_helper TYPE REF TO /bobf/cl_lib_h_set_property.
+    CREATE OBJECT lo_property_helper
+      EXPORTING
+        io_modify  = io_modify
+        is_context = is_ctx.
+
+    lo_property_helper = NEW /bobf/cl_lib_h_set_property( io_modify  = io_modify
+                                                           	is_context = is_ctx ).
+
+
+
+    " (3) Action not enabled when invoice is set to PAID
+    LOOP AT lt_hdr ASSIGNING FIELD-SYMBOL(<s_hdr>).
+
+      IF <s_hdr>-deliverystatus = 'D' or
+         <s_hdr>-deliverystatus = 'X'.
+        lv_action_enabled = abap_false.
+        lo_property_helper->set_node_delete_enabled(
+          EXPORTING
+            iv_key   = <s_hdr>-key       " Key of the instance for which the property is to be set
+            iv_value = lv_action_enabled        " New value of this property (true/false)
+        ).
+        lo_property_helper->set_node_update_enabled(
+          EXPORTING
+            iv_key   = <s_hdr>-key       " Key of the instance for which the property is to be set
+            iv_value = lv_action_enabled        " New value of this property (true/false)
+        ).
+      ELSE.
+        lv_action_enabled = abap_true.
+        lo_property_helper->set_node_delete_enabled(
+          EXPORTING
+            iv_key   = <s_hdr>-key       " Key of the instance for which the property is to be set
+            iv_value = abap_true        " New value of this property (true/false)
+        ).
+        lo_property_helper->set_node_update_enabled(
+          EXPORTING
+            iv_key   = <s_hdr>-key       " Key of the instance for which the property is to be set
+            iv_value = abap_true        " New value of this property (true/false)
+        ).
+      ENDIF.
+
+      IF <s_hdr>-deliverystatus = '' or
+         <s_hdr>-deliverystatus = 'I' or
+         <s_hdr>-deliverystatus = 'P'.
+        lv_action_enabled = abap_true.
+        lo_property_helper->set_action_enabled(
+            iv_action_key = zif_a_ic_so_hdr1_c=>sc_action-za_ic_so_hdr-set_so_status
+            iv_key        = <s_hdr>-key
+            iv_value      = lv_action_enabled ).
+      ELSE.
+        lv_action_enabled = abap_false.
+        lo_property_helper->set_action_enabled(
+            iv_action_key = zif_a_ic_so_hdr1_c=>sc_action-za_ic_so_hdr-set_so_status
+            iv_key        = <s_hdr>-key
+            iv_value      = lv_action_enabled ).
+
+      ENDIF.
+
+    ENDLOOP.
+
+  endmethod.
+ENDCLASS.

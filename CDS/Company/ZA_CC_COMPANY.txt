@@ -1,0 +1,48 @@
+@AbapCatalog.sqlViewName: 'ZA_CS_COMPANY'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@VDM.viewType: #CONSUMPTION
+@Metadata.allowExtensions: true
+@EndUserText.label: 'Consumption company'
+
+@ObjectModel: {
+transactionalProcessingDelegated: true,
+createEnabled: true,
+updateEnabled: true,
+deleteEnabled: 'EXTERNAL_CALCULATION',
+semanticKey: ['Company']
+}
+
+@OData.publish: true
+
+define view ZA_CC_COMPANY
+  as select from ZA_IC_COMPANY
+  /* Association to quantity unit value help provider */
+  association [0..1] to ZA_IC_DOMAINTEXT as _DomainValueHelp  on $projection.IndustryType = _DomainValueHelp.DomId
+  association [0..1] to ZA_IC_COMPANY    as _CompanyValueHelp on $projection.Company = _CompanyValueHelp.bukrs
+{
+      //ZA_IC_COMPANY
+      @ObjectModel.readOnly: true
+      @Consumption.valueHelp: '_CompanyValueHelp'
+  key bukrs                                     as Company,
+      @ObjectModel.mandatory: true
+      butxt                                     as CompanyName,
+      @ObjectModel.foreignKey.association: '_DomainValueHelp'
+      @ObjectModel.mandatory: true
+      @ObjectModel.text.association: '_DomainValueHelp'
+      industry                                  as IndustryType,
+      readytouse                                as ReadyToUse,
+      -- Virtual element
+      @ObjectModel.readOnly: true
+      @ObjectModel.virtualElement:true
+      @ObjectModel.virtualElementCalculatedBy:  'ABAP:ZCL_CALCULATION_RANK'
+      @ObjectModel.filter.transformedBy:        'ABAP:ZCL_FILTER_RANK'
+      @ObjectModel.sort.transformedBy:          'ABAP:ZCL_SORT_RANK'
+
+      cast(0 as abap.int1 )                     as Rank,
+
+      /* List of associations */
+      _DomainValueHelp,
+      _CompanyValueHelp
+}

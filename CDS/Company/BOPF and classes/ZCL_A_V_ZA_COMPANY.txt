@@ -1,0 +1,86 @@
+class ZCL_A_V_ZA_COMPANY definition
+  public
+  inheriting from /BOBF/CL_LIB_V_SUPERCL_SIMPLE
+  final
+  create public .
+
+public section.
+
+  methods /BOBF/IF_FRW_VALIDATION~EXECUTE
+    redefinition .
+protected section.
+private section.
+ENDCLASS.
+
+
+
+CLASS ZCL_A_V_ZA_COMPANY IMPLEMENTATION.
+
+
+  method /BOBF/IF_FRW_VALIDATION~EXECUTE.
+
+ DATA:
+    lt_hdr          TYPE ZTAIC_COMPANY,
+    ls_hdr          LIKE LINE OF lt_hdr,
+    ls_hdr1         LIKE LINE OF lt_hdr,
+    lv_msg          TYPE string,
+    ls_msg          TYPE symsg,
+    lv_curr_iso     TYPE tcurc-isocd,
+    lv_country_iso  TYPE intca,
+    ls_key          LIKE LINE OF et_failed_key,
+    lx_gdt          TYPE REF TO cx_gdt_conversion.
+
+  IF eo_message IS NOT BOUND.
+    eo_message = /bobf/cl_frw_factory=>get_message( ).
+  ENDIF.
+  CALL METHOD io_read->retrieve
+    EXPORTING
+      iv_node      = is_ctx-node_key
+      it_key       = it_key
+      iv_fill_data = abap_true
+    IMPORTING
+      et_data      = lt_hdr.
+  LOOP AT lt_hdr INTO ls_hdr.
+    ls_key-key = ls_hdr-key.
+*    IF ls_hdr-BUKRS IS INITIAL.
+*      MESSAGE e001
+*        Customer No is not speified
+*        INTO lv_msg.
+*      MOVE-CORRESPONDING sy TO ls_msg.
+*      eo_message->add_message(
+*        is_msg  = ls_msg
+*        iv_node = is_ctx-node_key
+*        iv_key  = ls_hdr-key
+*        iv_attribute = 'Company' ).                     "#EC NOTEXT
+*      APPEND ls_key TO et_failed_key.
+*    ENDIF.
+    IF ls_hdr-BUTXT IS INITIAL.
+      MESSAGE e002
+*       Sales Org is not specified
+        INTO lv_msg.
+      MOVE-CORRESPONDING sy TO ls_msg.
+      eo_message->add_message(
+        is_msg  = ls_msg
+        iv_node = is_ctx-node_key
+        iv_key  = ls_hdr-key
+        iv_attribute = 'CompanyText' ).                  "#EC NOTEXT
+      APPEND ls_key TO et_failed_key.
+    ENDIF.
+    IF ls_hdr-INDUSTRY IS INITIAL.
+      MESSAGE e003
+*       Currency is not specified
+        INTO lv_msg.
+      MOVE-CORRESPONDING sy TO ls_msg.
+      eo_message->add_message(
+        is_msg  = ls_msg
+        iv_node = is_ctx-node_key
+        iv_key  = ls_hdr-key
+        iv_attribute = 'Industry' ).                       "#EC NOTEXT
+      APPEND ls_key TO et_failed_key.
+    ENDIF.
+  ENDLOOP.
+  SORT et_failed_key.
+  DELETE ADJACENT DUPLICATES FROM et_failed_key.
+
+  endmethod.
+ENDCLASS.

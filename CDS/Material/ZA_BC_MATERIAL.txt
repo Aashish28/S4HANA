@@ -1,0 +1,37 @@
+@AbapCatalog.sqlViewName: 'ZA_BS_MATERIAL'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Material basic view'
+@VDM.viewType: #BASIC
+@ObjectModel.representativeKey: 'matnr'
+
+@Search.searchable: true
+
+define view ZA_BC_MATERIAL as select from zsa_t_material 
+{
+    @EndUserText.label: 'Material'
+    @EndUserText.quickInfo: 'Material'
+    @Search.defaultSearchElement: true
+    @Search.fuzzinessThreshold: 0.8    
+key matnr,
+    @Semantics.text: true -- identifies the text field
+    @Search.defaultSearchElement: true
+    @Search.fuzzinessThreshold: 0.8    
+    @EndUserText.label: 'Material Name'
+    @EndUserText.quickInfo: 'Material Name'
+     maktx, 
+     mtart, 
+     @Semantics.unitOfMeasure: true
+     uom, 
+     bukrs,
+     @UI.hidden: true 
+     changedat, 
+     @UI.hidden: true 
+     changedby, 
+     @UI.hidden: true 
+     createdby, 
+     @UI.hidden: true 
+     createdat   
+     
+}

@@ -1,0 +1,38 @@
+@AbapCatalog.sqlViewName: 'ZA_CS_CUSTOMER'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Customer CDS'
+@VDM.viewType: #CONSUMPTION
+@Metadata.allowExtensions: true
+//@Metadata.ignorePropagatedAnnotations: true
+
+@OData.publish: true
+
+@ObjectModel: {
+compositionRoot: true,
+transactionalProcessingDelegated: true,
+createEnabled: true,
+updateEnabled: true,
+deleteEnabled: true,
+draftEnabled: true,
+semanticKey: ['customer']
+}
+ 
+define view ZA_CC_CUSTOMER as select from ZA_IC_CUSTOMER {
+
+  @ObjectModel.readOnly: true
+  key customer as customer,
+  @ObjectModel.mandatory: true
+      country as country,
+  @ObjectModel.mandatory: true
+      customername as customerName, 
+  @ObjectModel.mandatory: true
+      city as city, 
+  @ObjectModel.mandatory: true
+      customertype as customerType,
+      changedat, 
+      changedby, 
+      createdby, 
+      createdat
+}

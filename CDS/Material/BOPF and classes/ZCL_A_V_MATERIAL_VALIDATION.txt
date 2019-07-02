@@ -1,0 +1,95 @@
+class ZCL_A_V_MATERIAL_VALIDATION definition
+  public
+  inheriting from /BOBF/CL_LIB_V_SUPERCL_SIMPLE
+  final
+  create public .
+
+public section.
+
+  methods /BOBF/IF_FRW_VALIDATION~EXECUTE
+    redefinition .
+protected section.
+private section.
+ENDCLASS.
+
+
+
+CLASS ZCL_A_V_MATERIAL_VALIDATION IMPLEMENTATION.
+
+
+  METHOD /bobf/if_frw_validation~execute.
+
+    " Typed with node's combined table type
+    DATA lt_material TYPE ztaic_material2.
+
+    " Retrieve the data of the requested node instance
+    io_read->retrieve(
+    EXPORTING
+      iv_node         = is_ctx-node_key
+      it_key          = it_key
+    IMPORTING
+      et_data         = lt_material
+      eo_message      = eo_message
+      et_failed_key   = et_failed_key
+    ).
+
+    LOOP AT lt_material ASSIGNING FIELD-SYMBOL(<s_material>).
+
+      IF <s_material>-bukrs IS NOT INITIAL.
+
+        SELECT SINGLE * FROM zsa_t_company INTO @DATA(lw_company)
+          WHERE bukrs = @<s_material>-bukrs.
+
+        IF <s_material>-isactiveentity = abap_false.
+
+          DATA(lv_lifetime) = /bobf/cm_frw=>co_lifetime_state. "draft
+        ELSE.
+          lv_lifetime = /bobf/cm_frw=>co_lifetime_transition.  "active
+        ENDIF.
+
+        eo_message = /bobf/cl_frw_factory=>get_message( ).
+
+        IF lw_company IS INITIAL .
+
+          eo_message->add_message(
+          EXPORTING is_msg  = VALUE #( msgid = 'ZSA_MSG'  " example
+                msgno = 5
+                msgv1 = 'Please fill it' ##no_text
+                msgv2 = <s_material>-bukrs
+                msgty = /bobf/cm_frw=>co_severity_error
+                )
+                 iv_node = is_ctx-node_key
+              iv_key  = <s_material>-key
+              iv_attribute = zif_a_ic_material_c=>sc_node_attribute-za_ic_material-bukrs
+              iv_lifetime  = lv_lifetime
+          ).
+
+          APPEND VALUE #( key = <s_material>-key ) TO et_failed_key.
+
+        ELSE.
+
+          IF lw_company-readytouse IS INITIAL.
+
+            eo_message->add_message(
+            EXPORTING is_msg  = VALUE #( msgid = 'ZSA_MSG'  " example
+                  msgno = 6
+                  msgv1 = <s_material>-bukrs ##no_text
+                  msgty = /bobf/cm_frw=>co_severity_error
+                  )
+                   iv_node = is_ctx-node_key
+                iv_key  = <s_material>-key
+                iv_attribute = zif_a_ic_material_c=>sc_node_attribute-za_ic_material-bukrs
+                iv_lifetime  = lv_lifetime
+            ).
+
+            APPEND VALUE #( key = <s_material>-key ) TO et_failed_key.
+
+          ENDIF.
+
+        ENDIF.
+
+      ENDIF.
+    ENDLOOP.
+
+  ENDMETHOD.
+ENDCLASS.

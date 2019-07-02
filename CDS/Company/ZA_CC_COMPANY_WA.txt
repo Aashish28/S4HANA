@@ -1,0 +1,65 @@
+@AbapCatalog.sqlViewName: 'ZA_SC_COMPANY_WA'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@VDM.viewType: #CONSUMPTION
+@Metadata.allowExtensions: false
+@EndUserText.label: 'Consumption company with annotation'
+
+@ObjectModel: {
+transactionalProcessingDelegated: true,
+createEnabled: true,
+updateEnabled: true,
+deleteEnabled: true,
+semanticKey: ['Company']
+}
+
+@UI: {
+    headerInfo: {
+    typeName: 'Company',
+    typeNamePlural: 'Companies',
+    title: { type: #STANDARD, label: 'Company Maintenance' }
+    }
+}
+
+define view ZA_CC_COMPANY_WA as select from ZA_IC_COMPANY 
+    /* Association to quantity unit value help provider */
+    association [0..1] to ZA_IC_DOMAINTEXT as _DomainValueHelp
+         on $projection.IndustryType = _DomainValueHelp.DomId
+  association [0..1] to ZA_IC_COMPANY as _CompanyValueHelp
+        on $projection.Company = _CompanyValueHelp.bukrs 
+{
+    //ZA_IC_COMPANY 
+  @ObjectModel.readOnly: true
+  @Consumption.valueHelp: '_CompanyValueHelp'  
+  @UI: {
+        lineItem: [{position : 10 , label: 'Company', importance: #HIGH }, 
+        { type: #FOR_ACTION, position: 1, dataAction: 'BOPF:SET_USE_ALLOWED', label: 'Ready to use'}
+        ], 
+        selectionField: [ { position: 10 } ],
+        identification:[ { position: 10, label: 'Company Id' } ]   
+    }   
+  key bukrs as Company, 
+  @ObjectModel.mandatory: true
+  @UI: {
+      lineItem: [ { position: 20, label: 'Company Name', importance: #HIGH }],
+      identification:[ { position: 20, label: 'Company Name' } ]
+    }
+      butxt as CompanyName, 
+  @ObjectModel.foreignKey.association: '_DomainValueHelp'
+  @ObjectModel.mandatory: true
+  @ObjectModel.text.association: '_DomainValueHelp'    
+  @UI: {
+      lineItem: [ { position: 30, label: 'Industry Type', importance: #HIGH } ],
+      identification:[ { position: 30, label: 'Industry Type' } ],
+      selectionField: [ { position: 20 } ]
+    }
+      industry as IndustryType,      
+    @UI: {
+      lineItem: [ { position: 40, label: 'Ready To Use', importance: #HIGH } ]
+    }
+      readytouse as ReadyToUse,      
+/* List of associations */
+    _DomainValueHelp,
+    _CompanyValueHelp
+}

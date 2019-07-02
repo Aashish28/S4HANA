@@ -1,0 +1,47 @@
+class ZA_CL_CREATE_BUKRS definition
+  public
+  inheriting from /BOBF/CL_LIB_D_SUPERCL_SIMPLE
+  final
+  create public .
+
+public section.
+
+  methods /BOBF/IF_FRW_DETERMINATION~EXECUTE
+    redefinition .
+protected section.
+private section.
+ENDCLASS.
+
+
+
+CLASS ZA_CL_CREATE_BUKRS IMPLEMENTATION.
+
+
+  method /BOBF/IF_FRW_DETERMINATION~EXECUTE.
+
+"retrieve created data
+    data lt_data type ZTAIC_COMPANY.
+
+    io_read->retrieve( exporting iv_node = is_ctx-node_key
+                                 it_key  = it_key
+                       importing et_data = lt_data ).
+
+    select max( bukrs ) FROM ZSA_T_COMPANY into @data(lv_bukrs).
+
+    loop at lt_data reference into data(ls_data).
+
+
+        "set default values
+        lv_bukrs = lv_bukrs + 1.
+        CONDENSE lv_bukrs.
+        ls_data->bukrs  = lv_bukrs.
+
+    ENDLOOP.
+
+      "update draft
+        io_modify->update( iv_node = is_ctx-node_key
+                           iv_key  = ls_data->key
+                           is_data = ls_data ).
+
+  endmethod.
+ENDCLASS.

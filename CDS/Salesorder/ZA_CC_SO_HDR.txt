@@ -1,0 +1,144 @@
+@AbapCatalog.sqlViewName: 'ZA_CS_SO_HDR'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Sales order consumption'
+@VDM.viewType: #CONSUMPTION
+@Metadata.allowExtensions: true
+
+@ObjectModel.transactionalProcessingDelegated: true
+@ObjectModel: {
+    compositionRoot: true,
+    createEnabled: true,
+    updateEnabled: 'EXTERNAL_CALCULATION',
+    deleteEnabled: 'EXTERNAL_CALCULATION',
+    draftEnabled: true,
+    semanticKey: [ 'salesorder' ]
+}
+
+@OData.publish: true
+
+@UI: {
+    headerInfo: {
+    typeName: 'Sales Order',
+    typeNamePlural: 'Sales Order',
+    title: { type: #STANDARD, label: 'Sales Order', value: 'salesorder'},
+    description: {  label: 'Delivery Status', value: 'deliverystatus' }
+    }
+}
+
+//@UI.chart :{
+//chartType: #COLUMN,
+//dimensions:   'ds',
+//measures:   ['actualsales','targetsales']
+//} 
+//@UI.chart.measureAttributes.measure: 'actualsales'
+//@UI.chart.measureAttributes.role: #AXIS_1
+//@UI.chart.measureAttributes.asDataPoint: true
+
+define view ZA_CC_SO_HDR as select from ZA_IC_SO_HDR 
+association [0..*] to ZA_CC_SO_ITM as _items on _items.salesorder = $projection.salesorder
+association [1..1] to ZA_CC_SO_CHART as _charts on _charts.deliverystatus = $projection.deliverystatus
+{
+
+@UI.facet: [
+        { 
+            label: 'Sales Header',
+            id: 'HeaderInfo',
+            purpose: #STANDARD,
+            type: #COLLECTION,
+            position: 10
+        },
+        {
+            label: 'Document Info',
+            id : 'DocInfo',
+            purpose: #STANDARD,
+            parentId : 'HeaderInfo',
+            type : #IDENTIFICATION_REFERENCE,
+            targetQualifier : 'DocInfo',
+            position: 20
+        },
+//        {
+//            label: 'Admin Data',
+//            id : 'AdminData',
+//            purpose: #STANDARD,
+//            parentId : 'HeaderInfo',
+//            type : #FIELDGROUP_REFERENCE,
+//            targetQualifier : 'AdminData',
+//            position: 30
+//        },
+        {
+            label: 'Sales Order Items',
+            id : 'SalesItem',
+            purpose: #STANDARD,
+            position: 40,
+            type : #LINEITEM_REFERENCE,
+            targetElement: '_items'
+        }
+        ]
+        
+   //ZA_IC_SO_HDR 
+    @UI: {
+        lineItem: [{position : 10 , label: 'Sales Order', importance: #HIGH },
+        { type: #FOR_ACTION, position: 1, dataAction: 'BOPF:SET_SO_STATUS', label: 'Cancel Order', importance: #HIGH }
+        ], 
+        selectionField: [ { position: 10 } ]
+    } 
+key salesorder, 
+    @UI: {
+          lineItem: [ { position: 20, label: 'Customer', importance: #HIGH }
+//          { type: #WITH_INTENT_BASED_NAVIGATION, semanticObjectAction: 'display'}
+           ],
+          selectionField: [ { position: 20 }],
+          identification:[ { position: 20, label: 'Customer' } ],
+          fieldGroup:[{ qualifier: 'DocInfo', position: 20}]
+        }
+    customer, 
+    @UI: {
+          lineItem: [ { position: 30, label: 'Document Type', importance: #HIGH }],
+          selectionField: [ { position: 30 }],
+          identification:[ { position: 10, label: 'Document Type' } ],
+          fieldGroup:[{ qualifier: 'DocInfo', position: 10}]
+        }
+    documenttype, 
+     @UI: {
+          lineItem: [ { position: 60, label: 'Delivery status', importance: #HIGH, criticality: 'Criticality' }],
+          selectionField: [ { position: 40 }],
+          dataPoint: { criticality: 'Criticality', targetValueElement: 'deliverystatus'}            
+        }
+    deliverystatus, 
+    @UI: {
+          lineItem: [ { position: 40, label: 'Expected Delivery', importance: #HIGH }],
+          identification:[ { position: 30, label: 'Expected Delivery'} ],
+          fieldGroup:[{ qualifier: 'DocInfo', position: 30}]
+        }
+    expcteddeldate, 
+    @UI: {
+          lineItem: [ { position: 50, label: 'Actual Delivery', importance: #HIGH }],
+          identification:[ { position: 40, label: 'Actual Delivery ' } ],
+          fieldGroup:[{ qualifier: 'DocInfo', position: 40}]
+        }
+    actualdeldate, 
+//    @UI: {
+//        fieldGroup: [{ qualifier: 'AdminData' , position: 40, importance: #HIGH }]
+//    }
+    changedby, 
+    createdby, 
+    createdat,
+    Criticality,
+//    @ObjectModel.readOnly: true
+//    _charts.deliverystatus as ds,
+//    @ObjectModel.readOnly: true
+//    _charts.targetsales as targetsales ,
+//    @ObjectModel.readOnly: true
+//    _charts.actualsales as actualsales,
+    @ObjectModel.association: {
+          type: [ #TO_COMPOSITION_CHILD ]
+      }
+     _items,      
+    /* Associations */ 
+    _customers,
+    _Status,
+    _charts
+    
+}

@@ -1,0 +1,90 @@
+class ZCL_A_A_SET_SO_STATUS definition
+  public
+  inheriting from /BOBF/CL_LIB_A_SUPERCL_SIMPLE
+  final
+  create public .
+
+public section.
+
+  methods /BOBF/IF_FRW_ACTION~EXECUTE
+    redefinition .
+protected section.
+private section.
+ENDCLASS.
+
+
+
+CLASS ZCL_A_A_SET_SO_STATUS IMPLEMENTATION.
+
+
+  METHOD /bobf/if_frw_action~execute.
+
+    DATA: lv_field TYPE string VALUE 'deliverystatus' .
+
+    IF eo_message IS NOT BOUND.
+      eo_message = /bobf/cl_frw_factory=>get_message( ).
+    ENDIF.
+
+
+    CASE is_ctx-act_key..
+      WHEN zif_a_ic_so_hdr1_c=>sc_action-za_ic_so_hdr-set_so_status.
+
+        " header and items data declaration
+        DATA(lt_header) = VALUE ztaic_so_hdr1( ).
+        FIELD-SYMBOLS <ls_param> TYPE zas_a_set_so_status.
+        ASSIGN is_parameters->* TO <ls_param>.
+
+        CALL METHOD io_read->retrieve
+          EXPORTING
+            iv_node      = is_ctx-node_key
+            it_key       = it_key
+            iv_fill_data = abap_true
+          IMPORTING
+            et_data      = lt_header.
+
+        " WRITING BO data ---------------------------------------------
+
+        LOOP AT lt_header ASSIGNING FIELD-SYMBOL(<s_data>) WHERE isactiveentity = abap_true.
+          " Set readyto use
+          <s_data>-deliverystatus = <ls_param>-deliverystatus.
+
+          IF <LS_PARAM>-deliverystatus = 'D'.
+            <s_data>-actualdeldate = sy-datum.
+            UPDATE zsa_t_so_hdr SET lfstk = <LS_PARAM>-deliverystatus
+              adeldt = sy-datum
+              WHERE vbeln = <ls_param>-salesorder.
+          ELSE.
+            UPDATE zsa_t_so_hdr SET lfstk = <LS_PARAM>-deliverystatus
+              WHERE vbeln = <ls_param>-salesorder.
+          ENDIF.
+
+
+*          io_modify->update(
+*            EXPORTING
+*            iv_node               = is_ctx-node_key
+*            iv_key                = <s_data>-key
+*            iv_root_key           = <s_data>-root_key
+*            is_data               = REF #( <s_data>-node_data )
+*            it_changed_fields     = VALUE #( ( zif_a_ic_so_hdr1_c=>sc_node_attribute-za_ic_so_hdr-deliverystatus ) )
+*            ).
+        ENDLOOP.
+
+        et_data = lt_header.
+
+*    DATA(ls_so_header) = CORRESPONDING zsa_t_so_hdr( lt_header[ 1 ]
+*                          MAPPING vbeln = salesorder
+*                                  kunnr = customer
+*                                  auart = documenttype
+*                                  lfstk = deliverystatus
+*                                  rdeldt = expcteddeldate
+*                                  adeldt = actualdeldate ).
+*
+*    UPDATE zsa_t_so_hdr SET lfstk = <LS_PARAM>-deliverystatus
+*            WHERE vbeln = <ls_param>-salesorder.
+
+      WHEN OTHERS.
+    ENDCASE.
+
+
+  ENDMETHOD.
+ENDCLASS.

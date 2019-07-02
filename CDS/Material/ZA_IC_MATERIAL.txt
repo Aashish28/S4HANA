@@ -1,0 +1,56 @@
+@AbapCatalog.sqlViewName: 'ZA_IS_MATERIAL'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Material interface cds'
+@VDM.viewType: #BASIC
+
+@ObjectModel: {
+    compositionRoot: true,
+    modelCategory: #BUSINESS_OBJECT,
+    transactionalProcessingEnabled: true, 
+    writeActivePersistence: 'ZSA_T_MATERIAL',
+    createEnabled: true,
+    deleteEnabled: true,
+    updateEnabled: true,
+    semanticKey: ['matnr'],
+                
+    lifecycle.enqueue:{
+    expiryBehavior:#RELATIVE_TO_ENQUEUE_START,
+    expiryInterval: 'PT1M'    
+    },
+
+    lifecycle.processing:{
+    expiryBehavior:#RELATIVE_TO_PROCESSING_START,
+    expiryInterval: 'PT1M'    
+    },
+
+    -- Additional annotations for draft enablement
+    draftEnabled: true,    
+    writeDraftPersistence: 'ZSA_T_MATERIAL_D',
+    -- Additional ETag annotation (time stamp)
+    entityChangeStateId: 'changedat' 
+    }
+
+@Search.searchable: true
+
+define view ZA_IC_MATERIAL as select from zsa_t_material {
+    @ObjectModel.readOnly: true    
+    key matnruuid, 
+    @ObjectModel.readOnly: true
+        matnr, 
+    @Semantics.text: true -- identifies the text field
+    @Search.defaultSearchElement: true
+    @Search.fuzzinessThreshold: 0.8   
+        maktx, 
+        mtart, 
+        uom,         
+        bukrs,
+        //cast ( rating as abap.dec(2, 1)) as rating,
+        rating,
+        cast ( stock as abap.dec( 4, 2 )) as stock,         
+        changedat, 
+        changedby,
+        createdby, 
+        createdat
+}

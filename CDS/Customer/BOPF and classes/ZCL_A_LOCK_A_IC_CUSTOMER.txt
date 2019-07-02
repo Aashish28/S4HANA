@@ -1,0 +1,58 @@
+class ZCL_A_LOCK_A_IC_CUSTOMER definition
+  public
+  inheriting from /BOBF/CL_LIB_A_LOCK_ACTIVE
+  final
+  create public .
+
+public section.
+
+  methods /BOBF/IF_LIB_LOCK_ACTIVE~LOCK_ACTIVE_ENTITY
+    redefinition .
+protected section.
+private section.
+ENDCLASS.
+
+
+
+CLASS ZCL_A_LOCK_A_IC_CUSTOMER IMPLEMENTATION.
+
+
+  METHOD /bobf/if_lib_lock_active~lock_active_entity.
+
+    DATA: lt_root        TYPE ztaic_customer1,
+          ls_root        LIKE LINE OF lt_root,
+          lv_lock_failed TYPE abap_bool,
+          ls_failed_key  TYPE /bobf/s_frw_key.
+
+    io_read->retrieve(
+      EXPORTING
+        iv_node                 = is_ctx-node_key
+        it_key                  = it_key
+      IMPORTING
+        et_data                 = lt_root
+        et_failed_key           = et_failed_key
+    ).
+
+    READ TABLE lt_root INTO ls_root INDEX 1.
+    IF sy-subrc EQ 0.
+      CALL FUNCTION 'ENQUEUE_EZA_CUSTOMER'
+        EXPORTING
+          mode_zsa_t_customer = 'E'
+          kunnr               = ls_root-customer
+          x_kunnr             = space
+          _scope              = '2'
+          _wait               = space
+          _collect            = ' '              " Initially only collect lock
+        EXCEPTIONS
+          foreign_lock        = 1                " Object already locked
+          system_failure      = 2                " Internal error from enqueue server
+          OTHERS              = 3.
+      IF sy-subrc <> 0.
+        ls_failed_key-key = ls_root-customer.
+        APPEND ls_failed_key TO et_failed_key.
+      ENDIF.
+    ENDIF.
+
+
+  ENDMETHOD.
+ENDCLASS.

@@ -1,0 +1,46 @@
+@AbapCatalog.sqlViewName: 'ZA_IS_CUSTOMER'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Customer interface cds'
+@VDM.viewType: #TRANSACTIONAL
+
+@ObjectModel: {
+    transactionalProcessingEnabled: true, 
+    compositionRoot: true,
+    createEnabled: true,
+    deleteEnabled: true,
+    updateEnabled: true,
+    draftEnabled: true,    
+    writeDraftPersistence: 'ZSA_T_CUSTOMER_D',
+    semanticKey: ['customer'],
+    entityChangeStateId: 'changedat',
+    lifecycle.enqueue:{
+    expiryBehavior: #RELATIVE_TO_ENQUEUE_START,
+    expiryInterval: 'PT1M'    
+    },
+    
+    lifecycle.processing:{
+    expiryBehavior: #RELATIVE_TO_PROCESSING_START,
+    expiryInterval: 'PT1M'
+    }
+                       
+    }
+
+@Search.searchable: true
+
+define view ZA_IC_CUSTOMER as select from ZA_BC_CUSTOMER {
+    //zsa_t_customer 
+  key  kunnr as customer, 
+       land1 as country, 
+    @Semantics.text: true -- identifies the text field
+    @Search.defaultSearchElement: true
+    @Search.fuzzinessThreshold: 0.8   
+       custname as customername, 
+       city as city, 
+       custtype as customertype,
+       changedat, 
+       changedby, 
+       createdby, 
+       createdat
+}

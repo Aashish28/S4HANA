@@ -1,0 +1,65 @@
+@AbapCatalog.sqlViewName: 'ZA_IS_SO_HDR'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Sales order header transactional'
+@VDM.viewType: #TRANSACTIONAL
+
+@ObjectModel:{
+compositionRoot: true,
+createEnabled: true,
+updateEnabled: true,
+deleteEnabled: true,
+transactionalProcessingEnabled: true,
+semanticKey: ['salesorder'],
+draftEnabled: true,
+writeDraftPersistence: 'ZSA_T_SO_HDR_D'
+}
+
+
+define view ZA_IC_SO_HDR as select from ZA_BC_SO_HDR as Header
+// Association
+association [0..*] to ZA_IC_SO_ITM as _items on _items.salesorder = $projection.salesorder 
+//Value helps
+association [0..1] to ZA_BC_CUSTOMER as _customers on _customers.kunnr = $projection.customer
+association [0..1] to Sepm_I_SalesOrdOverallStatus as _Status  on _Status.SalesOrderOverallStatus = $projection.deliverystatus
+{
+@ObjectModel.readOnly: true
+key Header.salesorder,
+@ObjectModel.mandatory: true
+@ObjectModel.foreignKey.association: '_customers' 
+@ObjectModel.text.association: '_customers'
+@Consumption.semanticObject: 'ZA_SO'
+Header.customer, 
+@ObjectModel.mandatory: true
+Header.documenttype,
+@ObjectModel.readOnly: true 
+@ObjectModel.foreignKey.association: '_Status'
+@ObjectModel.text.association: '_Status'
+Header.deliverystatus, 
+Header.expcteddeldate,
+@ObjectModel.readOnly: true 
+Header.actualdeldate, 
+@ObjectModel.readOnly: true
+Header.changedat, 
+@ObjectModel.readOnly: true
+Header.changedby, 
+@ObjectModel.readOnly: true
+Header.createdby, 
+@ObjectModel.readOnly: true
+Header.createdat,
+@ObjectModel.readOnly: true
+    case deliverystatus
+    when ''  then 0
+    when 'N' then 0
+    when 'I' then 2
+    when 'P' then 2
+    when 'D' then 3
+    when 'X' then 1
+    else 0
+    end as Criticality ,
+ @ObjectModel.association.type: [#TO_COMPOSITION_CHILD]
+ _items,
+ _customers,
+ _Status 
+}

@@ -1,0 +1,64 @@
+@AbapCatalog.sqlViewName: 'ZA_CS_SO_CHART'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Sales order chart consumption'
+@VDM.viewType: #CONSUMPTION
+
+@OData.publish: true
+
+
+@UI: {
+    headerInfo: {
+    typeName: 'Sales Order Chart',
+    typeNamePlural: 'Sales Order Chart',
+    title: { type: #STANDARD, label: 'Sales Order', value: '1'},
+    description: {  label: 'Delivery Status', value: 'deliverystatus' }
+    }
+}
+
+@UI.chart:[{
+  qualifier: 'chart',
+  title:'Sales Revenue',
+  description: 'Bullet Micro Chart',
+  chartType: #BULLET,
+  measures:['ordercount'],
+  measureAttributes: [
+    { measure: 'ordercount', role: #AXIS_1, asDataPoint: true }
+  ]
+}]
+
+define view ZA_CC_SO_CHART as select from ZA_BC_SO_CHART {
+
+
+@UI.facet: [{ purpose: #HEADER,
+              type: #CHART_REFERENCE,
+              targetQualifier: 'chart',
+              position: 10,
+              importance: #HIGH  
+           },
+           {
+            purpose: #STANDARD,
+            type: #FIELDGROUP_REFERENCE,
+            targetElement: 'deliverystatus',
+            position: 20,
+            importance: #HIGH
+           }           
+           ]
+
+    //ZA_BC_SO_CHART 
+@UI.dataPoint: [{ criticality: 'Criticality', targetValueElement: 'deliverystatus' }]
+   key deliverystatus, 
+@UI.dataPoint: {
+       title:'Sales Revenue',
+       targetValueElement: 'orderexp',
+       forecastValue: 'orderfor',
+       minimumValue: 0,
+       maximumValue: 10,
+       criticality: 'Criticality'    
+    }  
+       ordercount,
+    5 as orderexp,
+    7 as orderfor,
+    '3'  as Criticality
+}

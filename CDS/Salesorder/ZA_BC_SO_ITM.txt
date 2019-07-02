@@ -1,0 +1,16 @@
+@AbapCatalog.sqlViewName: 'ZA_BS_SO_ITM'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Sales order item basic'
+@VDM.viewType: #BASIC
+define view ZA_BC_SO_ITM as select from zsa_t_so_itm {
+key vbeln as salesorder, 
+key posnr as salesorderitem, 
+    ltrim ( matnr , '0') as material, 
+    posar as itemtype, 
+    zmeng as quantity, 
+    zieme as uom, 
+    zwert as amount, 
+    waerk as currency
+}

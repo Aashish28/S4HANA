@@ -1,0 +1,44 @@
+class ZCL_A_DELETE_A_IC_SO_HDR1 definition
+  public
+  inheriting from /BOBF/CL_LIB_A_DELETE_ACTIVE
+  final
+  create public .
+
+public section.
+
+  methods /BOBF/IF_LIB_DELETE_ACTIVE~DELETE_ACTIVE_ENTITY
+    redefinition .
+protected section.
+private section.
+ENDCLASS.
+
+
+
+CLASS ZCL_A_DELETE_A_IC_SO_HDR1 IMPLEMENTATION.
+
+
+  method /BOBF/IF_LIB_DELETE_ACTIVE~DELETE_ACTIVE_ENTITY.
+    " To get only the active data as this code wil trigger for draft deletion as well
+    " For draft deletion the framework wil take care, for active, we need to.
+    /bobf/cl_lib_draft=>/bobf/if_lib_union_utilities~separate_keys(
+      EXPORTING iv_bo_key = is_ctx-bo_key
+        iv_node_key = is_ctx-node_key
+        it_key = it_key
+      IMPORTING
+        et_active_key = DATA(lt_active_bopf_keys)
+        ).
+    "we will get the data in BOPF keys format, we need to get the sales order number from that
+    CHECK lt_active_bopf_keys IS NOT INITIAL.
+    DATA ls_header TYPE zsa_t_so_hdr.
+    " Convert the bopf key to active document key
+    /bobf/cl_lib_draft=>/bobf/if_lib_union_utilities~get_active_document_key(
+      EXPORTING iv_bo_key = is_ctx-bo_key
+        iv_node_key = is_ctx-node_key
+        iv_bopf_key = lt_active_bopf_keys[ 1 ]-key
+      IMPORTING es_active_document_key = ls_header-vbeln ).
+    " Delete the data
+    DELETE FROM zsa_t_so_hdr WHERE vbeln = ls_header-vbeln.
+    DELETE FROM zsa_t_so_itm WHERE vbeln = ls_header-vbeln.
+
+  endmethod.
+ENDCLASS.

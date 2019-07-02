@@ -1,0 +1,155 @@
+class ZCL_DR_A_IC_SO_HDR1 definition
+  public
+  inheriting from /BOBF/CL_LIB_DR_CLASSIC_APP
+  final
+  create public .
+
+public section.
+
+  methods /BOBF/IF_FRW_DRAFT~COPY_DRAFT_TO_ACTIVE_ENTITY
+    redefinition .
+protected section.
+private section.
+ENDCLASS.
+
+
+
+CLASS ZCL_DR_A_IC_SO_HDR1 IMPLEMENTATION.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Instance Public Method ZCL_DR_A_IC_SO_HDR1->/BOBF/IF_FRW_DRAFT~COPY_DRAFT_TO_ACTIVE_ENTITY
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] IS_CTX                         TYPE        /BOBF/S_FRW_CTX_DRAFT
+* | [--->] IT_DRAFT_KEY                   TYPE        /BOBF/T_FRW_KEY
+* | [--->] IO_READ                        TYPE REF TO /BOBF/IF_FRW_READ
+* | [--->] IO_MODIFY                      TYPE REF TO /BOBF/IF_FRW_MODIFY
+* | [<---] EO_MESSAGE                     TYPE REF TO /BOBF/IF_FRW_MESSAGE
+* | [<---] ET_KEY_LINK                    TYPE        /BOBF/T_FRW_KEY_LINK_ACT_DRAFT
+* | [<---] ET_FAILED_DRAFT_KEY            TYPE        /BOBF/T_FRW_KEY
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  method /BOBF/IF_FRW_DRAFT~COPY_DRAFT_TO_ACTIVE_ENTITY.
+
+     DATA: ls_msg TYPE symsg.
+    " Get the message container, to push any messages to the UI if requred
+    IF eo_message IS NOT BOUND.
+      eo_message = /bobf/cl_frw_message_factory=>create_container( ).
+    ENDIF.
+    " header and items data declaration
+    DATA(lt_header) = VALUE ztaic_so_hdr1( ).
+    DATA(lt_items) = VALUE ztaic_so_itm1( ).
+
+    "Read Header Data
+    "Pass the node key, which tells if we are trying to read header or item, in this case header
+    "Pass the draft keys, if we create an entry in the Fiori, they will be saved as draft intitial, those keys we will pass to get the data
+    io_read->retrieve(
+      EXPORTING
+        iv_node       = zif_a_ic_so_hdr1_c=>sc_node-za_ic_so_hdr
+        it_key        = it_draft_key
+        iv_fill_data = abap_true
+      IMPORTING
+        et_data       = lt_header
+    ).
+    " Read the Items data
+    " We need to read via the assocation, so passing the assocation key here
+    io_read->retrieve_by_association(
+      EXPORTING
+        iv_node                 = zif_a_ic_so_hdr1_c=>sc_node-za_ic_so_hdr  " Header Node Name
+        it_key                  = it_draft_key                 " Key Table
+        iv_association          = zif_a_ic_so_hdr1_c=>sc_association-za_ic_so_hdr-_items
+        iv_fill_data = abap_true
+      IMPORTING
+        et_data                 = lt_items                 " Data Return Structure
+    ).
+    " Always 1 header only expected as we can only create one sales order at a time
+    DATA(ls_so_header) = CORRESPONDING zsa_t_so_hdr( lt_header[ 1 ]
+                         MAPPING vbeln = salesorder
+                                 kunnr = customer
+                                 auart = documenttype
+                                 lfstk = deliverystatus
+                                 rdeldt = expcteddeldate
+                                 adeldt = actualdeldate
+                         ).
+
+    " Updating the header
+    GET TIME STAMP FIELD ls_so_header-changedat.
+    ls_so_header-changedby = sy-uname.
+    " I am checking if the sales order number is initial, it means it is the new entry
+    " Else it is an existing entry
+    " Alternatively we can also use lt_header[ 1 ]-HASACTIVEENTRY, which will tell if the active entry is available
+    " If the active entry is available means it is update sceanrio else it is create scenario
+    IF ls_so_header-vbeln IS NOT INITIAL.
+      MODIFY zsa_t_so_hdr FROM ls_so_header.
+    ELSE.
+      GET TIME STAMP FIELD ls_so_header-createdat.
+      ls_so_header-createdby = sy-uname.
+
+      SELECT COUNT(*) FROM zsa_t_so_hdr INTO @DATA(lv_count).
+
+      ls_so_header-vbeln = lv_count + 1.
+      CONDENSE ls_so_header-vbeln.
+      ls_so_header-lfstk = 'N'.
+
+      CALL FUNCTION 'CONVERSION_EXIT_ALPHA_INPUT'
+        EXPORTING
+          input  = ls_so_header-vbeln
+        IMPORTING
+          output = ls_so_header-vbeln.
+
+      INSERT zsa_t_so_hdr FROM ls_so_header.
+    ENDIF.
+
+    " Now update/create the items
+    DATA:
+            lt_items_save TYPE TABLE OF zsa_t_so_itm.
+    " Updating the items
+    SELECT COUNT( * )
+      FROM zsa_t_so_itm
+      INTO @DATA(lv_item_count)
+     WHERE vbeln = @ls_so_header-vbeln.
+    " Setting the item number here.
+    LOOP AT lt_items REFERENCE INTO DATA(lo_item) WHERE hasactiveentity EQ abap_false.
+      lv_item_count = lv_item_count * 10 + 10.
+      lo_item->salesorder = ls_so_header-vbeln.
+      lo_item->salesorderitem = lv_item_count.
+      CALL FUNCTION 'CONVERSION_EXIT_ALPHA_INPUT'
+        EXPORTING
+          input  = lo_item->salesorderitem
+        IMPORTING
+          output = lo_item->salesorderitem.
+
+*       CALL FUNCTION 'CONVERSION_EXIT_ALPHA_OUTPUT'
+*        EXPORTING
+*          input  = lo_item->material
+*        IMPORTING
+*          output = lo_item->material.
+
+    ENDLOOP.
+
+    lt_items_save = CORRESPONDING #( lt_items
+                                     MAPPING
+                                     vbeln = salesorder
+                                     posnr = salesorderitem
+                                     matnr = material
+                                     posar = itemtype
+                                     zmeng = quantity
+                                     zieme = uom
+                                     zwert = amount
+                                     waerk = currency ).
+    IF lt_items_save IS NOT INITIAL.
+      MODIFY zsa_t_so_itm FROM TABLE lt_items_save.
+    ENDIF.
+
+    " Now we need to tell the BOPF framework to delete the draft entries as we have successfully created the data in the DB
+    " But BOPF only understands the data in in GUIDs, so we need to convert the sales order number to BOPF key, we just need to parent key
+    DATA(lr_key_util) = /bobf/cl_lib_legacy_key=>get_instance( zif_a_ic_so_hdr1_c=>sc_bo_key ).
+
+    DATA(lv_bobf_key) = lr_key_util->convert_legacy_to_bopf_key(
+                            iv_node_key   = zif_a_ic_so_hdr1_c=>sc_node-za_ic_so_hdr
+                            is_legacy_key = ls_so_header-vbeln ).
+
+    APPEND VALUE #( draft = it_draft_key[ 1 ]-key active = lv_bobf_key ) TO et_key_link.
+
+
+  endmethod.
+ENDCLASS.

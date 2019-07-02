@@ -1,0 +1,40 @@
+@AbapCatalog.sqlViewName: 'ZA_IS_COMPANY'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@VDM.viewType: #BASIC
+@Metadata.allowExtensions: false
+@Metadata.ignorePropagatedAnnotations: true
+@EndUserText.label: 'Company Interface View'
+
+
+@ObjectModel:{
+modelCategory: #BUSINESS_OBJECT,
+transactionalProcessingEnabled: true,
+compositionRoot: true,
+writeActivePersistence: 'ZSA_T_COMPANY',
+
+createEnabled: true,
+updateEnabled: true,
+deleteEnabled: true,
+semanticKey: ['bukrs']
+}
+
+@Search.searchable: true
+    
+define view ZA_IC_COMPANY as select from zsa_t_company
+ {
+    @Search.defaultSearchElement: true
+    @Search.fuzzinessThreshold: 0.8
+ key bukrs, 
+     @Semantics: {
+         text: true,
+         name.fullName: true
+         }
+     butxt,
+     @Search.defaultSearchElement: false
+     industry,
+     @Search.defaultSearchElement: false   
+     readytouse
+     
+}

@@ -1,0 +1,48 @@
+@AbapCatalog.sqlViewName: 'ZA_BS_COMPANY'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Company CDS'
+@Search.searchable: true
+@VDM.viewType: #CONSUMPTION
+
+@UI: {
+    headerInfo: {
+    typeName: 'Company',
+    typeImageUrl: 'sap-icon://supplier'
+    }
+}
+
+define view ZA_BC_COMPANY as select from zsa_t_company
+ {
+
+    @UI.facet: [{ purpose: #QUICK_VIEW , type : #ADDRESS_REFERENCE , qualifier: 'CompanyFieldGroup' }]
+
+    @Search.defaultSearchElement: true
+    @Search.fuzzinessThreshold: 0.8
+ key bukrs, 
+     @Semantics: {
+         text: true,
+         name.fullName: true
+         }
+      @UI: {
+      fieldGroup:[{ qualifier: 'CompanyFieldGroup', position:10}]
+      }
+     butxt,
+     @Search.defaultSearchElement: false
+     industry,
+     @Search.defaultSearchElement: false   
+     readytouse,
+      @UI: {
+      fieldGroup:[{ qualifier: 'CompanyFieldGroup', position:20}]
+      }
+      @Semantics.telephone.type: [#CELL]
+     '12345' as phonenumber,
+      @UI: {
+      fieldGroup:[{ qualifier: 'CompanyFieldGroup', position:30}]
+      }
+      @Semantics.eMail.address: true
+      @Semantics.eMail.type: [#WORK]
+      'abc.xyz@gmail.com' as email
+    
+}

@@ -1,0 +1,45 @@
+class ZCL_A_D_SO_DEFAULT definition
+  public
+  inheriting from /BOBF/CL_LIB_D_SUPERCL_SIMPLE
+  final
+  create public .
+
+public section.
+
+  methods /BOBF/IF_FRW_DETERMINATION~EXECUTE
+    redefinition .
+protected section.
+private section.
+ENDCLASS.
+
+
+
+CLASS ZCL_A_D_SO_DEFAULT IMPLEMENTATION.
+
+
+  METHOD /bobf/if_frw_determination~execute.
+
+    "retrieve created data
+    DATA: lt_data  TYPE ztaic_so_hdr1,
+          lv_matnr TYPE matnr.
+
+    io_read->retrieve( EXPORTING iv_node = is_ctx-node_key
+                                 it_key  = it_key
+                       IMPORTING et_data = lt_data ).
+
+    LOOP AT lt_data REFERENCE INTO DATA(ls_data).
+      IF ls_data->salesorder IS INITIAL.
+        "set default values
+        ls_data->deliverystatus = 'N'.
+        ls_data->documenttype = 'OR'.
+        ls_data->expcteddeldate = sy-datum + 7 .
+        "update draft
+        io_modify->update( iv_node = is_ctx-node_key
+                           iv_key  = ls_data->key
+                           is_data = ls_data ).
+      ENDIF.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+ENDCLASS.

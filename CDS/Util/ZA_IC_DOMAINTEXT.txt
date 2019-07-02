@@ -1,0 +1,23 @@
+@AbapCatalog.sqlViewName: 'ZA_IS_DOMAINTEXT'
+@ObjectModel.dataCategory: #TEXT
+@ObjectModel.representativeKey: 'DomId'
+
+@Search.searchable: true
+define view ZA_IC_DOMAINTEXT
+ as select from dd07v as TextProvider{
+    
+    @EndUserText.label: 'Domain'
+    @EndUserText.quickInfo: 'Domain Value'
+    key TextProvider.domvalue_l as DomId,  
+    @Search.defaultSearchElement : false 
+    @Semantics.language: true 
+    key TextProvider.ddlanguage as Language,    
+    @Semantics.text: true -- identifies the text field
+    @Search.defaultSearchElement: true
+    @Search.fuzzinessThreshold: 0.8    
+    @EndUserText.label: 'Description'
+    @EndUserText.quickInfo: 'Domain Value Text'
+    TextProvider.ddtext as DomText
+}
+where domname = 'ZSA_DO_INDUSTRY'
+and   ddlanguage = $session.system_language

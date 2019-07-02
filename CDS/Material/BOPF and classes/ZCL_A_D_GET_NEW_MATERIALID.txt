@@ -1,0 +1,58 @@
+class ZCL_A_D_GET_NEW_MATERIALID definition
+  public
+  inheriting from /BOBF/CL_LIB_D_SUPERCL_SIMPLE
+  final
+  create public .
+
+public section.
+
+  methods /BOBF/IF_FRW_DETERMINATION~EXECUTE
+    redefinition .
+protected section.
+private section.
+ENDCLASS.
+
+
+
+CLASS ZCL_A_D_GET_NEW_MATERIALID IMPLEMENTATION.
+
+
+  method /BOBF/IF_FRW_DETERMINATION~EXECUTE.
+
+     "retrieve created data
+    data: lt_data type ztaic_material2,
+          lv_matnr TYPE matnr.
+
+    io_read->retrieve( exporting iv_node = is_ctx-node_key
+                                 it_key  = it_key
+                       importing et_data = lt_data ).
+
+  WITH +both AS ( SELECT  matnr FROM  zsa_t_material   "active data
+    UNION ALL
+    SELECT  matnr FROM  zsa_t_material_d )          "draft data
+  SELECT SINGLE
+    FROM +both
+    FIELDS MAX( matnr ) AS matnr
+    INTO @lv_matnr.
+
+    loop at lt_data reference into data(ls_data).
+        if ls_data->matnr is INITIAL.
+        "set default values
+        lv_matnr = lv_matnr + 1.
+        CONDENSE lv_matnr.
+        ls_data->matnr = lv_matnr.
+        ls_data->createdby = sy-uname.
+        GET TIME STAMP FIELD ls_data->createdat.
+        else.
+        ls_data->changedby = sy-uname.
+        GET TIME STAMP FIELD ls_data->changedat.
+        ENDIF.
+    ENDLOOP.
+
+      "update draft
+        io_modify->update( iv_node = is_ctx-node_key
+                           iv_key  = ls_data->key
+                           is_data = ls_data ).
+
+  endmethod.
+ENDCLASS.

@@ -1,0 +1,14 @@
+@ClientHandling.type: #CLIENT_INDEPENDENT
+@EndUserText.label: 'Domain Table import CDS'
+define table function ZA_TC_DOMAINTEXT
+  with parameters
+    p_domname : abap.char( 30 )
+//    @Environment.systemField: #SYSTEM_LANGUAGE
+//    p_language : abap.lang
+returns
+{
+  domVal              : domvalue_l;
+  domText             : val_text;
+}
+implemented by method
+  ZCL_A_TC=>GET_DOMTEXT;

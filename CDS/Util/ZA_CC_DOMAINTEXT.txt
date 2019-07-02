@@ -1,0 +1,19 @@
+@AbapCatalog.sqlViewName: 'ZA_CS_DOMAINTEXT'
+@EndUserText.label: 'Domain text'
+@Search.searchable: true
+
+define view ZA_CC_DOMAINTEXT 
+as select from dd07v as ValueProvider 
+
+association [0..*] to ZA_IC_DOMAINTEXT as _Text
+        on $projection.DomId = _Text.DomId
+{
+    @ObjectModel.text.association: '_Text'
+    @Search.defaultSearchElement: true
+    key domvalue_l as DomId,
+    
+    -- association 
+    _Text    
+}
+where domname = 'ZSA_DO_INDUSTRY'
+and   ddlanguage = $session.system_language

@@ -1,0 +1,51 @@
+@AbapCatalog.sqlViewName: 'ZA_IS_SO_ITM'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Sales order item transactional'
+@VDM.viewType: #TRANSACTIONAL
+
+@ObjectModel:{
+    createEnabled: true,
+    updateEnabled: true,
+    deleteEnabled: true,
+    writeDraftPersistence: 'ZSA_T_SO_ITM_D',
+    semanticKey:['salesorder', 'salesorderitem']
+}
+
+define view ZA_IC_SO_ITM
+  as select from ZA_BC_SO_ITM as Items
+  association [1..1] to ZA_IC_SO_HDR    as _header    on $projection.salesorder = _header.salesorder
+  association [0..1] to ZA_BC_MATERIAL  as _materials on  $projection.material = _materials.matnr
+  association [0..1] to SEPM_I_Currency as _currency  on $projection.currency = _currency.Currency
+  association [0..1] to I_UnitOfMeasure as _unitOfMeasure on $projection.uom = _unitOfMeasure.UnitOfMeasure
+{
+      @ObjectModel.readOnly: true
+  key Items.salesorder,
+      @ObjectModel.readOnly: true
+  key Items.salesorderitem,
+      @ObjectModel.mandatory: true
+      @ObjectModel.foreignKey.association: '_materials'
+      @ObjectModel.text.association: '_materials'
+      Items.material,
+      Items.itemtype,
+      @ObjectModel.mandatory: true
+      @Semantics.quantity.unitOfMeasure: 'uom'
+      Items.quantity,
+      @ObjectModel.readOnly: true
+      @Semantics.unitOfMeasure: true
+      @ObjectModel.foreignKey.association: '_unitOfMeasure' 
+      Items.uom,
+      @ObjectModel.mandatory: true
+      @Semantics.amount.currencyCode: 'currency'
+      Items.amount,
+      @ObjectModel.foreignKey.association: '_currency'
+      // @Semantics.currencyCode: true
+      Items.currency,
+
+      @ObjectModel.association.type: [#TO_COMPOSITION_PARENT,#TO_COMPOSITION_ROOT]
+      _header,
+      _materials,
+      _currency,
+      _unitOfMeasure
+}

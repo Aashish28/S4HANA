@@ -1,0 +1,128 @@
+@AbapCatalog.sqlViewName: 'ZA_CS_MATERIAL'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Material consumption view'
+@VDM.viewType: #CONSUMPTION
+@ObjectModel: {
+    semanticKey: ['Material'],
+    compositionRoot: true,  
+    transactionalProcessingDelegated: true, 
+    createEnabled: true,
+    deleteEnabled: true,
+    updateEnabled: true,                
+    draftEnabled: true   
+    }
+
+@UI: {
+    headerInfo: {
+    typeName: 'Material',
+    typeNamePlural: 'Materials',
+    title: { type: #STANDARD, label: 'Material Maintenance', value: 'Material'},
+    description: {  label: 'Material Text name', value: 'MaterialText' }
+    }
+}
+
+@OData.publish: true
+
+define view ZA_CC_MATERIAL as select from ZA_IC_MATERIAL 
+      association [0..1] to ZA_BC_COMPANY as _CompanyValueHelp
+        on $projection.Company = _CompanyValueHelp.bukrs 
+    {   
+    
+     @UI.facet: [
+        { 
+            label: 'Header data',
+            id: 'Header',
+            type: #COLLECTION
+        },
+        {
+            label: 'Document Information',
+            id : 'HeaderData',
+            parentId : 'Header',
+            type : #FIELDGROUP_REFERENCE,
+            targetQualifier : 'HeaderData'
+        },
+        {
+            label: 'Organizational Information',
+            id : 'OrgInfo',
+            parentId : 'Header',
+            type : #FIELDGROUP_REFERENCE,
+            targetQualifier : 'OrgInfo'
+        }
+    ]
+    
+    @UI.hidden: true
+    key matnruuid as MaterialUuid, 
+    @UI: {
+        lineItem: [{position : 10 , label: 'Material', importance: #HIGH }], 
+        selectionField: [ { position: 10 } ],
+        identification:[ { position: 10, label: 'Material Id' } ],
+        fieldGroup:[{ qualifier: 'HeaderData', position: 10}]
+    } 
+        @ObjectModel.mandatory: true
+        matnr as Material, 
+        @UI: {
+          lineItem: [ { position: 20, label: 'Material Text', importance: #HIGH }],
+          identification:[ { position: 20, label: 'Material Text' } ],
+        fieldGroup:[{ qualifier: 'HeaderData', position: 20}]
+        }
+        @ObjectModel.mandatory: true
+        maktx as MaterialText, 
+        @UI: {
+          lineItem: [ { position: 30, label: 'Material Type', importance: #HIGH } ],
+          identification:[ { position: 30, label: 'Material Type' } ],
+          selectionField: [ { position: 20 } ],
+          fieldGroup:[{ qualifier: 'HeaderData', position: 30}]
+        }
+        @ObjectModel.mandatory: true
+        mtart as MaterialType, 
+        @UI: {
+          lineItem: [ { position: 40, label: 'Unit of measure', importance: #HIGH } ],
+          identification:[ { position: 40, label: 'Unit of measure' } ],
+          fieldGroup:[{ qualifier: 'HeaderData', position: 40}]
+        }        
+        @ObjectModel.mandatory: true
+        uom as Uom,                 
+        @UI: {          
+          identification:[ { position: 50, label: 'Company' } ],
+          fieldGroup:{ qualifier: 'OrgInfo', position: 10 }
+        }        
+        @Consumption.valueHelp: '_CompanyValueHelp'
+        @ObjectModel.foreignKey.association: '_CompanyValueHelp' 
+        @ObjectModel.text.association: '_CompanyValueHelp'   
+        @ObjectModel.mandatory: true
+        @UI.dataPoint: { title: 'Company' }
+        @Consumption.semanticObject: 'ZA_SO'
+        bukrs as Company,
+
+        @UI: {
+          identification:[ { position: 50, label: 'Rating' } ],
+          fieldGroup:[{ qualifier: 'HeaderData', position: 50}],
+          dataPoint: { title:'Material Rating', targetValueElement: 5, targetValue: 5,    
+            visualization: #RATING
+           }
+        }        
+        rating as Rating,
+        @UI: {
+          lineItem: [ { position: 50, label: 'Stock', importance: #HIGH } ],
+          identification:[ { position: 60, label: 'Stock' } ],
+          fieldGroup:[{ qualifier: 'HeaderData', position: 60}]
+        } 
+        stock as Stock,                                                   
+        @EndUserText.label: 'Last Change At'
+        @Semantics.systemDateTime.lastChangedAt: true
+        changedat as ChangedAt, 
+        @EndUserText.label: 'Last Change By'
+        @Semantics.user.lastChangedBy: true
+        changedby as ChangedBy,
+        @Semantics.user.createdBy: true 
+        createdby as CreatedBy, 
+        @Semantics.systemDateTime.createdAt: true
+        createdat as CreatedAt,
+        
+        // Quick view as contact
+        //@UI.lineItem: [ { position: 50, label: 'Company', importance: #HIGH,
+        //                type: #AS_CONTACT, value: '.' } ]
+        _CompanyValueHelp   
+}       

@@ -1,0 +1,104 @@
+class ZCL_A_TC definition
+  public
+  final
+  create public .
+
+public section.
+INTERFACES if_amdp_marker_hdb.
+TYPES:
+      BEGIN OF ty_domain,
+        domVal TYPE DD07V-DOMVALUE_L,
+        domText TYPE DD07V-DDTEXT,
+      END OF ty_domain,
+      domain TYPE STANDARD TABLE OF ty_domain
+                           WITH EMPTY KEY.
+
+  CLASS-METHODS: GET_DOMTEXT
+                  FOR TABLE FUNCTION ZA_TC_DOMAINTEXT,
+                 GET_DOMTEXT_FUNC IMPORTING
+                 VALUE(iv_domain)          TYPE DOMNAME
+                 RETURNING VALUE(it_domain) TYPE domain,
+                 GET_DOMTEXT_PROC IMPORTING
+                 VALUE(iv_domain)          TYPE DOMNAME
+       EXPORTING VALUE(it_domain) TYPE domain,
+       GET_DOMTEXT_PROC_CALL_FUNC IMPORTING
+                 VALUE(iv_domain)          TYPE DOMNAME
+       EXPORTING VALUE(it_domain) TYPE ZCL_A_TC=>domain.
+protected section.
+private section.
+ENDCLASS.
+
+
+
+CLASS ZCL_A_TC IMPLEMENTATION.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Static Public Method ZCL_A_TC=>GET_DOMTEXT
+* +-------------------------------------------------------------------------------------------------+
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  METHOD GET_DOMTEXT BY DATABASE FUNCTION FOR HDB
+           LANGUAGE SQLSCRIPT
+           OPTIONS READ-ONLY
+           USING DD07V.
+
+   RETURN SELECT domvalue_l as domVal, ddtext as domtext
+                  FROM DD07V
+                    WHERE ddlanguage = session_context('LOCALE_SAP')
+                    AND   domname = :p_domname;
+
+  ENDMETHOD.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Static Public Method ZCL_A_TC=>GET_DOMTEXT_FUNC
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] IV_DOMAIN                      TYPE        DOMNAME
+* | [<-()] IT_DOMAIN                      TYPE        DOMAIN
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  METHOD GET_DOMTEXT_FUNC BY DATABASE FUNCTION FOR HDB LANGUAGE
+                          SQLSCRIPT OPTIONS READ-ONLY
+                          USING DD07V.
+
+        RETURN  SELECT domvalue_l as domVal, ddtext as domtext
+                      FROM DD07V
+                        WHERE ddlanguage = session_context('LOCALE_SAP')
+                        AND   domname = :iv_domain;
+
+
+  ENDMETHOD.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Static Public Method ZCL_A_TC=>GET_DOMTEXT_PROC
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] IV_DOMAIN                      TYPE        DOMNAME
+* | [<---] IT_DOMAIN                      TYPE        DOMAIN
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  METHOD GET_DOMTEXT_PROC BY DATABASE PROCEDURE FOR HDB LANGUAGE
+                          SQLSCRIPT OPTIONS READ-ONLY
+                          USING DD07V.
+       it_domain = SELECT domvalue_l as domVal, ddtext as domtext
+                    FROM DD07V
+                    WHERE ddlanguage = session_context('LOCALE_SAP')
+                    AND   domname = :iv_domain;
+
+   ENDMETHOD.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Static Public Method ZCL_A_TC=>GET_DOMTEXT_PROC_CALL_FUNC
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] IV_DOMAIN                      TYPE        DOMNAME
+* | [<---] IT_DOMAIN                      TYPE        ZCL_A_TC=>DOMAIN
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  METHOD GET_DOMTEXT_PROC_CALL_FUNC BY DATABASE PROCEDURE FOR HDB LANGUAGE
+                          SQLSCRIPT OPTIONS READ-ONLY
+                          USING ZCL_A_TC=>GET_DOMTEXT.
+
+       it_domain = SELECT *
+           FROM "ZCL_A_TC=>GET_DOMTEXT"(
+                  p_domname => :iv_domain);
+
+  ENDMETHOD.
+ENDCLASS.

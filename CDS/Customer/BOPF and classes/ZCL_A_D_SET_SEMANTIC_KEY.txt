@@ -1,0 +1,92 @@
+class ZCL_A_D_SET_SEMANTIC_KEY definition
+  public
+  inheriting from /BOBF/CL_LIB_D_SUPERCL_SIMPLE
+  final
+  create public .
+
+public section.
+
+  methods /BOBF/IF_FRW_DETERMINATION~EXECUTE
+    redefinition .
+protected section.
+private section.
+ENDCLASS.
+
+
+
+CLASS ZCL_A_D_SET_SEMANTIC_KEY IMPLEMENTATION.
+
+
+  METHOD /bobf/if_frw_determination~execute.
+
+    " This is used in the update scenario of the sales order(which has already been created) and when we are creating sales order items
+    DATA:
+      lt_header TYPE ztaic_so_hdr1,
+      lt_items  TYPE ztaic_so_itm1.
+    " read the sales order items
+    io_read->retrieve(
+      EXPORTING
+        iv_node    = zif_a_ic_so_hdr1_c=>sc_node-za_ic_so_itm  " Node Name
+        it_key     = it_key
+      IMPORTING
+        et_data    = lt_items
+    ).
+
+    " Obviously one item is only expected, check if the sales order number is initial for the draft entry
+    READ TABLE lt_items REFERENCE INTO DATA(lo_item) INDEX 1.
+    IF lo_item->salesorder IS INITIAL.
+      " If initial, then get the header draft entry, which will have the sales order number via the assocation from child to header
+      io_read->retrieve_by_association(
+        EXPORTING
+          iv_node                 = zif_a_ic_so_hdr1_c=>sc_node-za_ic_so_itm                " Node Name
+          it_key                  = it_key                 " Key Table
+          iv_association          = zif_a_ic_so_hdr1_c=>sc_association-za_ic_so_itm-to_root
+          iv_fill_data            = abap_true
+        IMPORTING
+          et_data                 = lt_header
+      ).
+      " Update the salesorder item with the so number
+      lo_item->salesorder = lt_header[ key = lo_item->parent_key ]-salesorder.
+
+
+      SELECT SINGLE uom FROM zsa_t_material
+        into lo_item->uom
+        WHERE matnr = lo_item->material.
+
+      io_modify->update(
+        EXPORTING
+          iv_node           = zif_a_ic_so_hdr1_c=>sc_node-za_ic_so_itm   " Node
+          iv_key            = lo_item->key                 " Key
+          iv_root_key       = lo_item->root_key                 " NodeID
+          is_data           = lo_item
+      ).
+
+    ELSE.
+
+    io_read->retrieve(
+      EXPORTING
+        iv_node  = zif_a_ic_so_hdr1_c=>sc_node-za_ic_so_itm
+        it_key   = it_key
+      IMPORTING
+        et_data = lt_items ).
+
+    LOOP AT lt_items REFERENCE INTO lo_item.
+
+      SELECT SINGLE uom FROM zsa_t_material
+        into lo_item->uom
+        WHERE matnr = lo_item->material.
+
+        io_modify->update(
+          EXPORTING
+            iv_node           = zif_a_ic_so_hdr1_c=>sc_node-za_ic_so_itm
+            iv_key            = lo_item->key      " Key
+            is_data           = lo_item           " Data
+            iv_root_key       = lo_item->root_key
+        ).
+
+    ENDLOOP.
+
+    ENDIF.
+
+  ENDMETHOD.
+ENDCLASS.

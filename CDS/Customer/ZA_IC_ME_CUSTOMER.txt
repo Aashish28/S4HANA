@@ -1,0 +1,52 @@
+@Metadata.layer: #CUSTOMER
+
+@UI: {
+    headerInfo: {
+    typeImageUrl: 'sap-icon://supplier',
+    typeName: 'Customer',
+    typeNamePlural: 'Customers',
+    title: { type: #STANDARD, label: 'Customer Maintenance', value: 'customer'},
+    description: {  label: 'Customer', value: 'customerName' }
+    }
+}
+
+annotate view ZA_CC_CUSTOMER
+    with 
+{
+
+@UI.facet: [{ purpose: #QUICK_VIEW , type : #FIELDGROUP_REFERENCE , qualifier: 'CustomerFieldGroup' }]
+
+    @UI: {
+        lineItem: [{position : 10 , label: 'Customer Id', importance: #HIGH }], 
+        fieldGroup: [{ qualifier: 'CustomerFieldGroup' , position: 10 }],
+        selectionField: [ { position: 10 } ],
+        identification:[ { position: 10, label: 'Customer Id' } ]
+    } 
+    customer; 
+    @UI: {
+        lineItem: [{position : 20 , label: 'Customer Name', importance: #HIGH }], 
+        identification:[ { position: 20, label: 'Customer Name' }],   
+        fieldGroup: [{ qualifier: 'CustomerFieldGroup' , position: 20 }]
+    } 
+    customerName; 
+    @UI: {
+        lineItem: [{position : 30 , label: 'Customer Type', importance: #HIGH }], 
+        identification:[ { position: 30, label: 'Customer Type' } ],
+        fieldGroup: [{ qualifier: 'CustomerFieldGroup' , position: 30 }]          
+    } 
+    @UI.dataPoint: { title: 'Customer Type' }
+    customerType;
+    @UI: {
+        lineItem: [{position : 40 , label: 'Country', importance: #HIGH }], 
+        selectionField: [ { position: 20 } ],
+        identification:[ { position: 40, label: 'Country' } ]   
+    } 
+    country; 
+    @UI: {
+        lineItem: [{position : 50 , label: 'City', importance: #HIGH }], 
+        selectionField: [ { position: 30 } ],
+        identification:[ { position: 50, label: 'City' } ]   
+    } 
+    city; 
+    
+}

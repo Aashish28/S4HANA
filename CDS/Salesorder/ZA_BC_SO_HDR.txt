@@ -1,0 +1,19 @@
+@AbapCatalog.sqlViewName: 'ZA_BS_SO_HDR'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Sales order header basic'
+@VDM.viewType: #BASIC
+
+define view ZA_BC_SO_HDR as select from zsa_t_so_hdr {
+key vbeln as salesorder,   
+    kunnr as customer, 
+    auart as documenttype, 
+    lfstk as deliverystatus, 
+    rdeldt as expcteddeldate, 
+    adeldt as actualdeldate, 
+    changedat, 
+    changedby, 
+    createdby, 
+    createdat
+}
