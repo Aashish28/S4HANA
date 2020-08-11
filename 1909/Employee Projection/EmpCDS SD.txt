@@ -1,0 +1,10 @@
+@EndUserText.label: 'Employee service defination'
+define service ZAA_EMP_SD_U {
+  expose ZAA_C_EMP_U as Employee;
+  expose ZAA_C_EMPSKILL_U as EmployeeSkill;
+  expose I_Currency as Currency;
+  expose I_Country as Country;
+  expose ZAA_I_SKILL_R as Skill;
+  expose ZAA_EMPTYPE_CDS as EmployeeType;
+  expose ZAA_GENDER_CDS as Gender;
+}

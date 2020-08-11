@@ -1,0 +1,39 @@
+@AbapCatalog.sqlViewName: 'ZAA_IEMP_U'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Employee intermediate view'
+@Search.searchable: true
+
+define root view ZAA_I_EMP_U as select from zaa_t_emp as Employee
+  composition [0..*] of ZAA_I_EMPSKILL_U as _EmpSkill
+  association [0..1] to ZAA_EMPTYPE_CDS as _EmpType  on $projection.EmpType = _EmpType.etype
+  association [0..1] to zaa_gender_cds  as _Gender   on $projection.Gender = _Gender.egender
+  association [0..1] to I_Country       as _Country  on $projection.Country = _Country.Country
+  association [0..1] to I_Currency      as _Currency on $projection.CurrencyCode = _Currency.Currency
+{
+    //ZAA_T_EMP
+    key Employee.eid as EmpId,
+    Employee.efname as FirstName,
+    Employee.elname as LastName,
+    Employee.edept as Department,
+    Employee.egender as Gender,
+    Employee.etype as EmpType,
+    Employee.email as Email,
+    @Semantics.currencyCode: true
+    Employee.currencycode as CurrencyCode,
+    @Semantics.amount.currencyCode: 'CurrencyCode'
+    Employee.esalary as Salary,
+    Employee.country as Country,
+    Employee.favorite as Favorite,
+    Employee.dob as Dob,
+    Employee.lastchangeby as LastChangeBy,
+    Employee.lastchangedat as LastChangedAt,
+    
+    // association
+      _EmpSkill,
+      _EmpType,
+      _Gender,
+      _Country,
+      _Currency
+}

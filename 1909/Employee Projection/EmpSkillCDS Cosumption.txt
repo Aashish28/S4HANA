@@ -1,0 +1,23 @@
+@EndUserText.label: 'Employee skill intermediate view'
+@AccessControl.authorizationCheck: #CHECK
+@Metadata.allowExtensions: true
+@Search.searchable: true
+
+define view entity ZAA_C_EMPSKILL_U as projection on ZAA_I_EMPSKILL_U {
+    //ZAA_I_EMPSKILL_U
+    key EmpID,
+    @Consumption.valueHelpDefinition: [{ entity: { name : 'ZAA_I_SKILL_R' , element: 'SkillID' }  }]
+    @ObjectModel.text.element: ['SkillName']    
+    @Search.defaultSearchElement: true
+    key SkillID,    
+    _Skill.SkillName as SkillName,
+    SkillExp,
+    PrimarySkill,
+    LastChangeBy,
+    LastChangedAt,
+    /* Associations */
+    //ZAA_I_EMPSKILL_U
+    _Employee : redirected to parent ZAA_C_EMP_U,
+    _Skill 
+    
+}

@@ -1,0 +1,79 @@
+CLASS lhc_ZAA_EMPTYPE_CDS DEFINITION INHERITING FROM cl_abap_behavior_handler.
+  PRIVATE SECTION.
+
+    METHODS validation_etype FOR VALIDATION ZAA_EMPTYPE_CDS~validation_etype
+      IMPORTING keys FOR ZAA_EMPTYPE_CDS.
+    METHODS calculate_used FOR determination zaa_emptype_cds~calculate_used
+    importing keys for zaa_emptype_cds.
+    METHODS get_features for features importing keys request requested_features for zaa_emptype_cds result et_etype_feature.
+
+ENDCLASS.
+
+CLASS lhc_ZAA_EMPTYPE_CDS IMPLEMENTATION.
+
+  METHOD validation_etype.
+
+  read entity zaa_emptype_cds from value #(
+         for keyval in keys ( %key = keyval
+           %control = value #(
+                etype = if_abap_behv=>mk-on ) ) )
+       result data(lt_emptype)
+       failed data(lt_emptype_failed)
+       reported data(lt_emptype_reported).
+       loop at lt_emptype into data(ls_emptype).
+        if ls_emptype-etype is not initial and ls_emptype-etype eq 'X'.
+          APPEND value #( etype = ls_emptype-etype ) to failed.
+          APPEND value #( etype = ls_emptype-etype
+                          %msg = new_message_with_text( text = 'Invalid employee type' )
+                          %element-etype = if_abap_behv=>mk-on
+                        ) to reported.
+        endif.
+       endloop.
+
+  ENDMETHOD.
+
+  METHOD calculate_used.
+       read entities of zaa_emptype_cds
+       entity zaa_emptype_cds from value #(
+         for keyval in keys ( etype = keyval
+           %control-used = if_abap_behv=>mk-on ) )
+       result data(lt_emptype)
+       failed data(lt_emptype_failed)
+       reported data(lt_emptype_reported).
+
+     LOOP AT keys INTO DATA(ls_key).
+        select count( * ) from zaa_t_emp into @data(lv_count)
+            where etype = @ls_key-etype.
+
+         data(lv_used)  = COND #( when lv_count > 0 then abap_true
+                                  else abap_false ).
+
+        MODIFY ENTITIES OF zaa_emptype_cds  IN LOCAL MODE
+          ENTITY zaa_emptype_cds
+          UPDATE FROM value #( for ls_emptype in lt_emptype (
+            etype = ls_emptype-etype
+            used = lv_used
+            %control-used = if_abap_behv=>mk-on
+          ) ).
+    ENDLOOP.
+
+  ENDMETHOD.
+
+  METHOD get_features.
+
+    read entity zaa_emptype_cds
+        fields ( etype used ) with value #( for keyval in keys ( %key = keyval-%key ) )
+        result data(lt_etype).
+
+        et_etype_feature = value #( for ls_etype in lt_etype (
+                %key = ls_etype-%key
+                %field-etype = if_abap_behv=>fc-f-read_only
+                %features-%delete = cond #( when ls_etype-used eq abap_true
+                                    then if_abap_behv=>fc-o-disabled
+                                  else if_abap_behv=>fc-o-enabled
+                                )
+        ) ).
+
+  ENDMETHOD.
+
+ENDCLASS.

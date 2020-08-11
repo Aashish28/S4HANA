@@ -1,0 +1,17 @@
+@EndUserText.label : 'Employee projects'
+@AbapCatalog.enhancementCategory : #NOT_EXTENSIBLE
+@AbapCatalog.tableCategory : #TRANSPARENT
+@AbapCatalog.deliveryClass : #A
+@AbapCatalog.dataMaintenance : #ALLOWED
+define table zaa_t_empproj {
+  key client    : abap.clnt not null;
+  key eid       : abap.int4 not null;
+  key sid       : abap.int4 not null;
+  key projname  : abap.char(30) not null;
+  sdate         : abap.dats;
+  edate         : abap.dats;
+  goingon       : abap.char(1);
+  lastchangeby  : syuname;
+  lastchangedat : timestampl;
+
+}

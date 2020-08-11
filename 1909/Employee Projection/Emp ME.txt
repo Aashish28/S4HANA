@@ -1,0 +1,85 @@
+@Metadata.layer: #CORE
+
+@UI:
+{
+ headerInfo:
+  {
+    typeName: 'Employee',
+    typeNamePlural: 'Employees',
+    title: { type: #STANDARD, value: 'EmpId' },
+    description : { type: #STANDARD , value: 'FirstName' }
+  }
+ }
+
+annotate view ZAA_C_EMP_U
+    with 
+{
+    @UI.facet: [
+      {
+       id:       'Employee',
+       purpose:  #STANDARD,
+       type:     #IDENTIFICATION_REFERENCE,
+       label:    'Employee Information',
+       position: 10 
+      },
+      {
+       id:       'Skill',
+       purpose:  #STANDARD,
+       type:     #LINEITEM_REFERENCE,
+       label:    'Employee Skills',
+       targetElement: '_EmpSkill',
+       position: 20 
+       }
+      ]
+
+      @UI: {
+          lineItem: [ { position: 10, importance: #HIGH, label: 'Employee ID' } ]
+          }
+      EmpId;
+      @UI: {
+        lineItem: [ { position: 20, label: 'First Name', importance: #HIGH } ],
+        identification:[ { position: 10, label: 'First Name' } ]
+      }
+      FirstName;
+      @UI: {
+        lineItem: [ { position: 30, label: 'Last Name', importance: #HIGH } ],
+        identification:[ { position: 20, label: 'Last Name' } ]
+      }
+      LastName;
+      @UI: {
+        lineItem: [ { position: 40, label: 'Department', importance: #HIGH } ],
+        identification:[ { position: 30, label: 'Department' } ],
+        selectionField: [{ position: 10 }]
+      }
+      @EndUserText.label: 'Department'
+      Department;
+      @UI: {   identification:[ { position: 50, label: 'Gender' } ]  ,
+         selectionField: [{ position: 20}]  }
+      @EndUserText.label: 'Gender'
+      Gender;
+
+      @UI: {   identification:[ { position: 60, label: 'Type' } ]  ,
+            selectionField: [{ position: 30 }]  }
+      @EndUserText.label: 'Employee Type'
+      EmpType;
+      @UI.hidden: true
+      EmpTypeDesc;
+      @UI: {   identification:[ { position: 70, label: 'Email' , url: 'email' } ]
+            }
+      Email;
+      @UI.hidden: true 
+      CurrencyCode;
+      @UI: {   identification:[ { position: 90, label: 'Salary' } ]    }
+      Salary;
+      @UI: {  lineItem: [{ type: #FOR_ACTION , dataAction: 'set_favorite' , label: 'Set Favorite' }] }
+      Favorite;
+      @UI: {   identification:[ { position: 100, label: 'Country' } ]    }
+      Country;
+      @UI: {   identification:[ { position: 110, label: 'DOB' } ]    }      
+      Dob;
+      @UI.hidden: true
+      LastChangeBy;
+      @UI.hidden: true
+      LastChangedAt;
+    
+}

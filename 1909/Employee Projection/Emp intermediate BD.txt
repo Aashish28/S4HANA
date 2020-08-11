@@ -1,0 +1,55 @@
+implementation unmanaged;
+
+define behavior for ZAA_I_EMP_U alias Employee
+implementation in class zbp_aa_i_emp_u unique
+//late numbering
+lock master
+//authorization master
+etag LastChangedAt
+{
+  create;
+  update;
+  delete;
+  association _EmpSkill { create; }
+
+  mapping for zaa_t_emp {
+   EmpId = eid;
+   FirstName = efname;
+   LastName = elname;
+   Department = edept;
+   Gender = egender;
+   EmpType= etype;
+   Email = email;
+   CurrencyCode = currencycode;
+   Salary = esalary;
+   Country = country;
+   Favorite = favorite;
+   Dob = dob;
+   LastChangeBy = lastchangeby;
+   LastChangedAt = lastchangedat;
+
+  }
+
+}
+
+define behavior for ZAA_I_EMPSKILL_U alias EmployeeSkill
+implementation in class zbp_aa_i_empskill_i unique
+//late numbering
+//lock dependent( <local_field_name> = <target_field_name> )
+//authorization dependent( <local_field_name> = <target_field_name> )
+//etag <field_name>
+{
+//  create;
+  update;
+  delete;
+
+  mapping for zaa_t_empskill{
+    EmpID = eid;
+    SkillID = sid;
+    SkillExp = sexp;
+    PrimarySkill = smain;
+    LastChangeBy = lastchangeby;
+    LastChangedAt = lastchangedat;
+
+  }
+}

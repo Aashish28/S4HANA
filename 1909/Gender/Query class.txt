@@ -1,0 +1,54 @@
+class ZCL_AA_GENDER definition
+  public
+  final
+  create public .
+
+public section.
+    TYPES : begin of ty_gender,
+               egender type char1,
+               egenderdesc type char20,
+               end of ty_gender.
+    DATA : it_gender type standard table of ty_gender with non-unique sorted key egender components egender,
+           it_result type table of ty_gender with key egender,
+           lv_gender type char1.
+    interfaces : if_rap_query_provider.
+protected section.
+private section.
+ENDCLASS.
+
+
+
+CLASS ZCL_AA_GENDER IMPLEMENTATION.
+  METHOD IF_RAP_QUERY_PROVIDER~SELECT.
+
+       data(lt_paging) =  io_request->get_paging(  ).
+       data(lt_order) = io_request->get_sort_elements(  ).
+       data(lt_select) = io_request->get_requested_elements(  ).
+       data(lt_parameter) = io_request->get_parameters(  ).
+
+       try.
+       data(lt_ranges) = io_request->get_filter(  )->get_as_ranges(  ).
+.
+       catch cx_rap_query_filter_no_range.
+       endtry.
+       if lt_ranges is not initial.
+        lv_gender = lt_ranges[ name = 'EGENDER' ]-range[ 1 ]-low.
+       endif.
+
+       it_gender = value #( ( egender = 'M'  egenderdesc = 'Male' )
+                             ( egender = 'F'  egenderdesc = 'Female' )
+                               ( egender = 'O'  egenderdesc = 'Others' ) ).
+
+      if lv_gender is not initial.
+        it_result = filter #( it_gender using key egender
+                                              where egender = conv #( lv_gender ) ).
+       else.
+         it_result = corresponding #( it_gender ).
+       endif.
+
+       io_response->set_total_number_of_records( lines( it_result ) ).
+       io_response->set_data( it_result ).
+
+  ENDMETHOD.
+
+ENDCLASS.

@@ -1,0 +1,37 @@
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Employee consumption view'
+@Metadata.allowExtensions: true
+@Search.searchable: true
+
+define root view entity ZAA_C_EMP_U as projection on ZAA_I_EMP_U {
+    //ZAA_I_EMP_U
+    key EmpId,
+    @Search.defaultSearchElement: true
+    FirstName,
+    @Search.defaultSearchElement: true
+    LastName,
+    Department,
+    @Consumption.valueHelpDefinition: [{ entity: { name : 'ZAA_GENDER_CDS' , element: 'Gender' }  }]
+    Gender,
+    @Consumption.valueHelpDefinition: [{ entity: { name : 'ZAA_EMPTYPE_CDS' , element: 'EmpType' }  }]
+    @ObjectModel.text.element: ['EmpTypeDesc']
+    EmpType,
+    _EmpType.etypedesc as EmpTypeDesc,
+    Email,
+    @Consumption.valueHelpDefinition: [{ entity: { name : 'I_Currency' , element: 'CurrencyCode' }  }]
+    CurrencyCode,
+    Salary,
+    @Consumption.valueHelpDefinition: [{ entity: { name : 'I_Country' , element: 'Country' }  }]
+    Country,
+    Favorite,
+    Dob,
+    LastChangeBy,
+    LastChangedAt,
+    /* Associations */
+    //ZAA_I_EMP_U
+    _Country,
+    _Currency,
+    _EmpSkill: redirected to composition child ZAA_C_EMPSKILL_U,
+    _EmpType,
+    _Gender
+}

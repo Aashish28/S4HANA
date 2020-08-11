@@ -1,0 +1,42 @@
+@AbapCatalog.sqlViewName: 'ZAA_EMPTYPE_VIEW'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Employee type CDS'
+
+
+@UI:
+{
+ headerInfo:
+  {
+    typeName: 'Employee Type',
+    typeNamePlural: 'Employees Type',
+    title: { type: #STANDARD, value: 'etype' },
+    description : { type: #STANDARD , value: 'etypedec' } 
+  }
+ }
+
+@ObjectModel.semanticKey: ['etype']
+@ObjectModel.representativeKey: 'etype'
+
+define root view ZAA_EMPTYPE_CDS as select from zaa_t_emptype {
+    //zaa_t_emptype
+      @UI: {
+          lineItem: [ { position: 10, importance: #HIGH, label: 'Employee Type' } ],
+          identification:[ { position: 10, label: 'Employee Type' } ]
+          }
+    key etype,
+      @UI: {
+        lineItem: [ { position: 20, label: 'Type Description', importance: #HIGH } ],
+        identification:[ { position: 20, label: 'Type Description' } ]
+      }
+    etypedesc,    
+      @UI: {  lineItem: [{ type: #FOR_ACTION , dataAction: 'set_active' , label: 'Set Active' }] }
+    active,
+    used,    
+    @Semantics.user.lastChangedBy: true
+    lastchangeby,
+    @UI.hidden: true
+    @Semantics.systemDateTime.lastChangedAt: true
+    lastchangedat
+}

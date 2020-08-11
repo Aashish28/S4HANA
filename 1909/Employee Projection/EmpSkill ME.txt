@@ -1,0 +1,48 @@
+@Metadata.layer: #CORE
+
+@UI:
+{
+ headerInfo:
+  {
+    typeName: 'Skill',
+    typeNamePlural: 'Skills',
+    title: { type: #STANDARD, value: 'SkillID' }
+  }
+ }
+ 
+annotate view ZAA_C_EMPSKILL_U
+    with 
+{
+    @UI.facet: [
+          {
+           id:       'Skill',
+           purpose:  #STANDARD,
+           type:     #IDENTIFICATION_REFERENCE,
+           label:    'Employee Skill',
+           position: 10 
+          }]
+    
+    //ZAA_I_EMPSKILL_U    
+      @UI: {
+        lineItem: [ { position: 10, label: 'Skill', importance: #HIGH } ],
+        identification:[ { position: 10, label: 'Skill' } ]
+      }
+    SkillID;
+    @UI.hidden: true  
+    SkillName;  
+      @UI: {
+        lineItem: [ { position: 20, label: 'Experience(In Months)', importance: #HIGH } ],
+        identification:[ { position: 20, label: 'Experience(In Months)' } ]
+      }
+    SkillExp;
+      @UI: {
+        lineItem: [ { position: 30, label: 'Primary Skill', importance: #HIGH } ],
+        identification:[ { position: 30, label: 'Primary Skill' } ]
+      }    
+    PrimarySkill;
+    @UI.hidden: true
+    LastChangeBy;
+    @UI.hidden: true
+    LastChangedAt;
+          
+}

@@ -1,0 +1,16 @@
+projection;
+
+define behavior for ZAA_C_EMP_U alias Employee
+use etag
+{
+  use create;
+  use update;
+  use delete;
+  use association _EMPSKILL { create; }
+}
+
+define behavior for ZAA_C_EMPSKILL_U alias EmployeeSkill
+{
+  use update;
+  use delete;
+}

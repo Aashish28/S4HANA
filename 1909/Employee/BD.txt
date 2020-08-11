@@ -1,0 +1,16 @@
+unmanaged implementation in class zbp_aa_emp_cds unique;
+
+define behavior for ZAA_EMP_CDS //alias <alias_name>
+//late numbering
+lock master
+//authorization master
+etag lastchangedat
+{
+  field (readonly) eid, lastchangeby, lastchangedat;
+  field (mandatory) efname, elname, egender , etype;
+//validation validation_egender on save { field egender; }
+  create;
+  update;
+  delete;
+  action ( features : instance ) set_favorite result[1] $self;
+}

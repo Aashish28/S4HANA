@@ -1,0 +1,22 @@
+@AbapCatalog.sqlViewName: 'ZAA_IEMPSKILL_U'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Employee skill intermediate view'
+@Metadata.allowExtensions: true
+
+define view ZAA_I_EMPSKILL_U as select from zaa_t_empskill as EmpSkill 
+association to parent ZAA_I_EMP_U as _Employee on $projection.EmpID = _Employee.EmpId
+association [0..1] to ZAA_I_SKILL_R as _Skill on $projection.SkillID = _Skill.SkillID
+{
+    key EmpSkill.eid as EmpID,
+    key EmpSkill.sid as SkillID,
+    EmpSkill.sexp as SkillExp,
+    EmpSkill.smain as PrimarySkill,
+    EmpSkill.lastchangeby as LastChangeBy,
+    EmpSkill.lastchangedat as LastChangedAt,
+    
+    //public association 
+    _Employee,
+    _Skill
+}

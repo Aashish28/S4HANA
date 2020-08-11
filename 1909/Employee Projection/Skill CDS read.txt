@@ -1,0 +1,11 @@
+@AbapCatalog.sqlViewName: 'ZAA_ISKILL_R'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Skill master cds'
+define view ZAA_I_SKILL_R as select from zaa_t_skill {
+    //zaa_t_skill
+    key sid as SkillID,
+    @Semantics.text: true
+    sname as SkillName
+}
