@@ -1,0 +1,7 @@
+@EndUserText.label: 'Employee service defination'
+define service ZAA_EMP_SD {
+  expose ZAA_EMP_CDS as Employee;
+  expose I_Country as Country;
+  expose ZAA_EMPTYPE_CDS as EmployeeType;
+  expose ZAA_GENDER_CDS as Gender;
+}
