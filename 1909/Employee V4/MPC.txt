@@ -1,0 +1,168 @@
+class ZCL_AA_EMP_V4_MPC definition
+  public
+  inheriting from /IWBEP/CL_V4_ABS_MODEL_PROV
+  final
+  create public .
+
+public section.
+    interfaces zif_aa_emp_odata_v4.
+    methods /iwbep/if_v4_mp_basic~define redefinition.
+protected section.
+private section.
+
+    aliases gty_cds_views
+      for zif_aa_emp_odata_v4~gty_cds_views.
+    aliases gcs_entity_set_names
+      for zif_aa_emp_odata_v4~gcs_entity_set_names .
+    aliases gcs_entity_type_names
+      for zif_aa_emp_odata_v4~gcs_entity_type_names .
+    aliases gcs_nav_prop_names
+      for zif_aa_emp_odata_v4~gcs_nav_prop_names.
+
+    methods define_emp
+      importing
+        io_model type ref to /iwbep/if_v4_med_model
+      raising
+        /iwbep/cx_gateway .
+    methods define_empskill
+      importing
+        io_model type ref to /iwbep/if_v4_med_model
+      raising
+        /iwbep/cx_gateway .
+
+ENDCLASS.
+
+
+
+CLASS ZCL_AA_EMP_V4_MPC IMPLEMENTATION.
+  METHOD /IWBEP/IF_V4_MP_BASIC~DEFINE.
+    define_emp( io_model ).
+    define_empskill( io_model ).
+  ENDMETHOD.
+
+    method define_emp.
+    data: lt_primitive_properties type /iwbep/if_v4_med_element=>ty_t_med_prim_property,
+          lo_entity_set           type ref to /iwbep/if_v4_med_entity_set,
+          lo_nav_prop             type ref to /iwbep/if_v4_med_nav_prop,
+          lo_entity_type          type ref to /iwbep/if_v4_med_entity_type,
+          lv_referenced_cds_view  type gty_cds_views-emp  . " As internal ABAP name we use the name of the CDS view
+
+
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    "   Create entity type
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    lo_entity_type = io_model->create_entity_type_by_struct(
+                      exporting
+                        iv_entity_type_name          = gcs_entity_type_names-internal-emp
+                        is_structure                 = lv_referenced_cds_view
+                        iv_add_conv_to_prim_props    = abap_true
+                        iv_add_f4_help_to_prim_props = abap_true
+                        iv_gen_prim_props            = abap_true ).
+
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    " Set external EDM name for entity type
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    lo_entity_type->set_edm_name( gcs_entity_type_names-edm-emp ).
+
+
+
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    " Rename external EDM names of properties so that CamelCase notation is used
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    lo_entity_type->get_primitive_properties( importing et_property = lt_primitive_properties ).
+
+    loop at lt_primitive_properties into data(lo_primitive_property).
+      lo_primitive_property->set_edm_name( to_mixed( val = lo_primitive_property->get_internal_name( ) ) ).
+    endloop.
+
+
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    " Set key field(s)
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    lo_primitive_property = lo_entity_type->get_primitive_property( 'EMPID' ).
+    lo_primitive_property->set_is_key( ).
+
+    lo_primitive_property = lo_entity_type->get_primitive_property('DOB').
+    lo_primitive_property->set_is_nullable(  ).
+
+    lo_primitive_property = lo_entity_type->get_primitive_property('LASTCHANGEBY').
+    lo_primitive_property->set_is_nullable(  ).
+
+    lo_primitive_property = lo_entity_type->get_primitive_property('LASTCHANGEDAT').
+    lo_primitive_property->set_is_nullable(  ).
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    "   Create navigation property
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    lo_nav_prop = lo_entity_type->create_navigation_property( gcs_nav_prop_names-internal-emp_to_skills ).
+    lo_nav_prop->set_edm_name( gcs_nav_prop_names-edm-emp_to_skills ).
+
+    lo_nav_prop->set_target_entity_type_name( gcs_entity_type_names-internal-empskill ).
+    lo_nav_prop->set_target_multiplicity( /iwbep/if_v4_med_element=>gcs_med_nav_multiplicity-to_many_optional ).
+    lo_nav_prop->set_on_delete_action( /iwbep/if_v4_med_element=>gcs_med_on_delete_action-none ).
+
+
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    "   Create entity set
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    lo_entity_set = lo_entity_type->create_entity_set( gcs_entity_set_names-internal-emp ).
+    lo_entity_set->set_edm_name( gcs_entity_set_names-edm-emp ).
+
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    " Add the binding of the navigation path
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    lo_entity_set->add_navigation_prop_binding( iv_navigation_property_path = conv #( gcs_nav_prop_names-internal-emp_to_skills )
+                                                iv_target_entity_set        = gcs_entity_set_names-internal-empskill ).
+
+  endmethod.
+
+method define_empskill.
+    data: lo_entity_type          type ref to /iwbep/if_v4_med_entity_type,
+          lo_entity_set           type ref to /iwbep/if_v4_med_entity_set,
+          lt_primitive_properties type /iwbep/if_v4_med_element=>ty_t_med_prim_property,
+          lv_referenced_cds_view  type gty_cds_views-empskill  . " As internal ABAP name we use the name of the CDS view
+
+
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    " Create entity type
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    lo_entity_type = io_model->create_entity_type_by_struct(
+                      exporting
+                        iv_entity_type_name          = gcs_entity_type_names-internal-empskill
+                        is_structure                 = lv_referenced_cds_view
+                        iv_add_conv_to_prim_props    = abap_true
+                        iv_add_f4_help_to_prim_props = abap_true
+                        iv_gen_prim_props            = abap_true ).
+
+    lo_entity_type->set_edm_name( gcs_entity_type_names-edm-empskill ).
+
+
+    lo_entity_type->get_primitive_properties( importing et_property = lt_primitive_properties ).
+
+    loop at lt_primitive_properties into data(lo_primitive_property).
+      lo_primitive_property->set_edm_name( to_mixed( val = lo_primitive_property->get_internal_name( ) ) ).
+    endloop.
+
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    " Set key field(s)
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    lo_primitive_property = lo_entity_type->get_primitive_property( 'EMPID' ).
+    lo_primitive_property->set_is_key( ).
+
+    lo_primitive_property = lo_entity_type->get_primitive_property( 'SKILLID'  ).
+    lo_primitive_property->set_is_key( ).
+
+    lo_primitive_property = lo_entity_type->get_primitive_property('LASTCHANGEBY').
+    lo_primitive_property->set_is_nullable(  ).
+
+    lo_primitive_property = lo_entity_type->get_primitive_property('LASTCHANGEDAT').
+    lo_primitive_property->set_is_nullable(  ).
+
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    "   Create entity set
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    lo_entity_set = lo_entity_type->create_entity_set( gcs_entity_set_names-internal-empskill ).
+    lo_entity_set->set_edm_name( gcs_entity_set_names-edm-empskill ).
+
+  endmethod.
+
+ENDCLASS.

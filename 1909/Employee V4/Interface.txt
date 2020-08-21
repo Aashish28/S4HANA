@@ -1,0 +1,67 @@
+interface ZIF_AA_EMP_ODATA_V4
+  public .
+ types:
+    begin of gty_cds_views,
+      empskill type zaa_c_empskill_v4,
+      emp     type zaa_c_emp_v4,
+    end of gty_cds_views.
+
+  types: begin of gty_s_so_soi .
+      include type gty_cds_views-emp.
+  types:
+    _empskill type standard table of gty_cds_views-empskill with default key,
+    end of gty_s_so_soi .
+
+  types:
+    begin of gt_key_range,
+      empid   type range of gty_cds_views-emp-EmpId,
+      skillid type range of gty_cds_views-empskill-SkillID,
+    end of gt_key_range.
+
+  constants :
+
+    begin of gcs_cds_view_names,
+      empskill type /iwbep/if_v4_med_element=>ty_e_med_internal_name value 'ZAA_C_EMPSKILL_V4',
+      emp      type /iwbep/if_v4_med_element=>ty_e_med_internal_name value 'ZAA_C_EMP_V4',
+    end of gcs_cds_view_names,
+
+    begin of gcs_entity_type_names,
+      begin of internal,
+        empskill type /iwbep/if_v4_med_element=>ty_e_med_internal_name value 'ZAA_C_EMPSKILL_V4',
+        emp     type /iwbep/if_v4_med_element=>ty_e_med_internal_name value 'ZAA_C_EMP_V4',
+      end of internal,
+      begin of edm,
+        empskill type /iwbep/if_v4_med_element=>ty_e_med_edm_name value 'EmpSkillType',
+        emp     type /iwbep/if_v4_med_element=>ty_e_med_edm_name value 'EmpType',
+      end of edm,
+    end of gcs_entity_type_names,
+
+    begin of gcs_entity_set_names,
+      begin of internal,
+        empskill type /iwbep/if_v4_med_element=>ty_e_med_internal_name value 'ZAA_C_EMPSKILL_V4',
+        emp     type /iwbep/if_v4_med_element=>ty_e_med_internal_name value 'ZAA_C_EMP_V4',
+      end of internal,
+      begin of edm,
+        empskill type /iwbep/if_v4_med_element=>ty_e_med_edm_name value 'EmpSkill',
+        emp     type /iwbep/if_v4_med_element=>ty_e_med_edm_name value 'Emp',
+      end of edm,
+    end of gcs_entity_set_names ,
+
+    begin of gcs_nav_prop_names,
+      begin of internal,
+        emp_to_skills type /iwbep/if_v4_med_element=>ty_e_med_internal_name value '_EMPSKILL',
+      end of internal,
+      begin of edm,
+        emp_to_skills type /iwbep/if_v4_med_element=>ty_e_med_edm_name value '_EmpSkill',
+      end of edm,
+    end of gcs_nav_prop_names,
+
+    begin of gcs_expand_expressions,
+      "BEGIN OF internal,
+      emp_to_skills type /iwbep/if_v4_runtime_types=>ty_expand_expression value '_EMPSKILL',
+      "END OF internal,
+      "BEGIN OF edm,
+
+    end of gcs_expand_expressions .
+
+endinterface.

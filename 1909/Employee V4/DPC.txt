@@ -1,0 +1,716 @@
+class ZCL_AA_EMP_V4_DPC definition
+  public
+  inheriting from /IWBEP/CL_V4_ABS_DATA_PROVIDER
+  final
+  create public .
+
+public section.
+interfaces zif_aa_emp_odata_v4.
+    methods /iwbep/if_v4_dp_basic~read_entity redefinition .
+    methods /iwbep/if_v4_dp_basic~read_entity_list redefinition.
+    methods /iwbep/if_v4_dp_basic~read_ref_target_key_data_list redefinition .
+    methods /iwbep/if_v4_dp_basic~create_entity redefinition.
+    methods /iwbep/if_v4_dp_basic~update_entity redefinition.
+    methods /iwbep/if_v4_dp_basic~delete_entity redefinition.
+protected section.
+private section.
+    aliases gcs_entity_set_names
+       for zif_aa_emp_odata_v4~gcs_entity_set_names .
+    aliases gcs_entity_type_names
+      for zif_aa_emp_odata_v4~gcs_entity_type_names .
+    aliases gty_cds_views
+      for zif_aa_emp_odata_v4~gty_cds_views.
+    aliases gcs_nav_prop_names
+      for zif_aa_emp_odata_v4~gcs_nav_prop_names.
+    aliases gcs_expand_expressions
+      for zif_aa_emp_odata_v4~gcs_expand_expressions.
+
+  methods read_list_emp
+      importing
+        io_request        type ref to /iwbep/if_v4_requ_basic_list
+        io_response       type ref to /iwbep/if_v4_resp_basic_list
+        iv_orderby_string type string
+        iv_where_clause   type string
+        iv_select_string  type string
+        iv_skip           type i
+        iv_top            type i
+        is_done_list      type /iwbep/if_v4_requ_basic_list=>ty_s_todo_process_list
+      raising
+        /iwbep/cx_gateway.
+    methods read_entity_emp
+      importing
+        io_request  type ref to /iwbep/if_v4_requ_basic_read
+        io_response type ref to /iwbep/if_v4_resp_basic_read
+      raising
+        /iwbep/cx_gateway.
+    methods read_ref_key_list_emp
+      importing
+        io_request  type ref to /iwbep/if_v4_requ_basic_ref_l
+        io_response type ref to /iwbep/if_v4_resp_basic_ref_l
+      raising
+        /iwbep/cx_gateway.
+
+    methods read_list_empskill
+      importing
+        io_request        type ref to /iwbep/if_v4_requ_basic_list
+        io_response       type ref to /iwbep/if_v4_resp_basic_list
+        iv_orderby_string type string
+        iv_where_clause   type string
+        iv_select_string  type string
+        iv_skip           type i
+        iv_top            type i
+        is_done_list      type /iwbep/if_v4_requ_basic_list=>ty_s_todo_process_list
+      raising
+        /iwbep/cx_gateway.
+
+
+    methods read_entity_empskill
+      importing
+        io_request  type ref to /iwbep/if_v4_requ_basic_read
+        io_response type ref to /iwbep/if_v4_resp_basic_read
+      raising
+        /iwbep/cx_gateway.
+
+*    methods create_emp
+*      importing
+*        io_request  type ref to /iwbep/if_v4_requ_basic_create
+*        io_response type ref to /iwbep/if_v4_resp_basic_create
+*      raising
+*        /iwbep/cx_gateway.
+*    methods create_empskill
+*      importing
+*        io_request  type ref to /iwbep/if_v4_requ_basic_create
+*        io_response type ref to /iwbep/if_v4_resp_basic_create
+*      raising
+*        /iwbep/cx_gateway.
+
+*         METHODS deep_create_emp
+*      IMPORTING
+*        io_request  TYPE REF TO /iwbep/if_v4_requ_adv_create
+*        io_response TYPE REF TO /iwbep/if_v4_resp_adv_create
+*      RAISING
+*        /iwbep/cx_gateway.
+
+*    methods update_emp
+*      importing
+*        io_request  type ref to /iwbep/if_v4_requ_basic_update
+*        io_response type ref to /iwbep/if_v4_resp_basic_update
+*      raising
+*        /iwbep/cx_gateway.
+*    methods delete_emp
+*      importing
+*        io_request  type ref to /iwbep/if_v4_requ_basic_delete
+*        io_response type ref to /iwbep/if_v4_resp_basic_delete
+*      raising
+*        /iwbep/cx_gateway.
+*    methods delete_empskill
+*      importing
+*        io_request  type ref to /iwbep/if_v4_requ_basic_delete
+*        io_response type ref to /iwbep/if_v4_resp_basic_delete
+*      raising
+*        /iwbep/cx_gateway.
+*    methods update_empskill
+*      importing
+*        io_request  type ref to /iwbep/if_v4_requ_basic_update
+*        io_response type ref to /iwbep/if_v4_resp_basic_update
+*      raising
+*        /iwbep/cx_gateway.
+
+
+ENDCLASS.
+
+
+
+CLASS ZCL_AA_EMP_V4_DPC IMPLEMENTATION.
+
+ method /iwbep/if_v4_dp_basic~read_entity.
+
+    data: lv_entityset_name type /iwbep/if_v4_med_element=>ty_e_med_internal_name.
+
+
+    io_request->get_entity_set( importing ev_entity_set_name = lv_entityset_name ).
+
+    case lv_entityset_name.
+
+      when gcs_entity_set_names-internal-emp.
+        read_entity_emp(
+          exporting
+            io_request  = io_request
+            io_response = io_response ).
+
+      when gcs_entity_set_names-internal-empskill.
+        read_entity_empskill(
+          exporting
+            io_request  = io_request
+            io_response = io_response ).
+
+      when others.
+        super->/iwbep/if_v4_dp_basic~read_entity(
+          exporting
+            io_request  = io_request
+            io_response = io_response ).
+
+    endcase.
+
+  endmethod.
+
+method /iwbep/if_v4_dp_basic~read_entity_list.
+
+    data lv_entityset_name type /iwbep/if_v4_med_element=>ty_e_med_internal_name.
+
+    data: ls_todo_list         type /iwbep/if_v4_requ_basic_list=>ty_s_todo_list,
+          ls_done_list         type /iwbep/if_v4_requ_basic_list=>ty_s_todo_process_list,
+          lv_where_clause      type string,
+          lv_select_string     type string,
+          lv_orderby_string    type string,
+          lt_selected_property type /iwbep/if_v4_runtime_types=>ty_t_property_path,
+          lv_skip              type i value 0,
+          lv_top               type i value 0,
+          lt_orderby_property  type abap_sortorder_tab.
+
+
+    io_request->get_todos( importing es_todo_list = ls_todo_list ).
+
+
+    " $orderby was called
+    if ls_todo_list-process-orderby = abap_true.
+      ls_done_list-orderby = abap_true.
+      "** only supported as of 751 or 752
+      "get Open SQL Order by Clause
+      "io_request->get_osql_orderby_clause( IMPORTING ev_osql_orderby_clause = lv_orderby_string ).
+*        CATCH /iwbep/cx_gateway.    "
+
+      io_request->get_orderby( importing et_orderby_property = lt_orderby_property ).
+      clear lv_orderby_string.
+      loop at lt_orderby_property into data(ls_orderby_property).
+        if ls_orderby_property-descending = abap_true.
+          concatenate lv_orderby_string ls_orderby_property-name 'DESCENDING' into lv_orderby_string separated by space.
+        else.
+          concatenate lv_orderby_string ls_orderby_property-name 'ASCENDING' into lv_orderby_string separated by space.
+        endif.
+      endloop.
+
+    else.
+      " lv_orderby_string must not be empty.
+      lv_orderby_string = 'PRIMARY KEY'.
+    endif.
+
+
+    " $skip / $top handling
+    if ls_todo_list-process-skip = abap_true.
+      ls_done_list-skip = abap_true.
+      io_request->get_skip( importing ev_skip = lv_skip ).
+    endif.
+    if ls_todo_list-process-top = abap_true.
+      ls_done_list-top = abap_true.
+      io_request->get_top( importing ev_top = lv_top ).
+    endif.
+
+
+    " $select handling
+    if ls_todo_list-process-select = abap_true.
+      ls_done_list-select = abap_true.
+      io_request->get_selected_properties(  importing et_selected_property = lt_selected_property ).
+      concatenate lines of lt_selected_property into lv_select_string  separated by ','.
+    else.
+      "check coding. If no columns are specified via $select retrieve all columns from the model instead?
+      lv_select_string = '*'.
+      "or better to throw an exception instead?
+    endif.
+
+
+    " specific sales orders based on $filter?
+    if ls_todo_list-process-filter = abap_true.
+      ls_done_list-filter = abap_true.
+      io_request->get_filter_osql_where_clause( importing ev_osql_where_clause = lv_where_clause ).
+    endif.
+
+
+    io_request->get_entity_set( importing ev_entity_set_name = lv_entityset_name ).
+
+    case lv_entityset_name.
+
+      when gcs_entity_set_names-internal-emp.
+
+        read_list_emp(
+          exporting
+            io_request        = io_request
+            io_response       = io_response
+            iv_orderby_string = lv_orderby_string
+            iv_select_string  = lv_select_string
+            iv_where_clause   = lv_where_clause
+            iv_skip           = lv_skip
+            iv_top            = lv_top
+            is_done_list      = ls_done_list ).
+
+      when gcs_entity_set_names-internal-empskill.
+
+        read_list_empskill(
+          exporting
+            io_request        = io_request
+            io_response       = io_response
+            iv_orderby_string = lv_orderby_string
+            iv_select_string  = lv_select_string
+            iv_where_clause   = lv_where_clause
+            iv_skip           = lv_skip
+            iv_top            = lv_top
+            is_done_list      = ls_done_list ).
+
+      when others.
+
+        super->/iwbep/if_v4_dp_basic~read_entity_list( io_request  = io_request
+                                                       io_response = io_response ).
+    endcase.
+
+  endmethod.
+
+    method /iwbep/if_v4_dp_basic~read_ref_target_key_data_list.
+
+    data: lv_source_entity_name type /iwbep/if_v4_med_element=>ty_e_med_internal_name.
+
+
+    io_request->get_source_entity_type( importing ev_source_entity_type_name = lv_source_entity_name ).
+
+    case lv_source_entity_name.
+
+      when gcs_entity_type_names-internal-emp.
+        read_ref_key_list_emp(
+           exporting
+            io_request  = io_request
+            io_response = io_response ).
+
+      when others.
+        super->/iwbep/if_v4_dp_basic~read_ref_target_key_data_list(
+          exporting
+            io_request  = io_request
+            io_response = io_response ).
+
+    endcase.
+
+  endmethod.
+
+    method /iwbep/if_v4_dp_basic~create_entity.
+    data: lv_entity_type_name type /iwbep/if_v4_med_element=>ty_e_med_internal_name.
+
+
+    io_request->get_entity_type( importing ev_entity_type_name = lv_entity_type_name ).
+
+*    case lv_entity_type_name.
+*
+*      when gcs_entity_type_names-internal-emp.
+*        create_emp(
+*            io_request  = io_request
+*            io_response = io_response ).
+*
+*      when gcs_entity_type_names-internal-empskill.
+*        create_empskill(
+*            io_request  = io_request
+*            io_response = io_response ).
+*
+*      when others.
+*
+*        super->/iwbep/if_v4_dp_basic~create_entity(
+*            exporting
+*              io_request  = io_request
+*              io_response = io_response ).
+*
+*    endcase.
+
+  endmethod.
+
+  method /iwbep/if_v4_dp_basic~delete_entity.
+
+    data: lv_entity_type_name type /iwbep/if_v4_med_element=>ty_e_med_internal_name.
+
+    io_request->get_entity_type( importing ev_entity_type_name = lv_entity_type_name ).
+
+*    case lv_entity_type_name.
+*
+*      when gcs_entity_type_names-internal-emp.
+*        delete_emp(
+*          exporting
+*            io_request  = io_request
+*            io_response = io_response ).
+*
+*      when gcs_entity_type_names-internal-empskill.
+*        delete_empskill(
+*          exporting
+*            io_request  = io_request
+*            io_response = io_response ).
+*
+*      when others.
+*        raise exception type /iwbep/cx_v4_tea
+*          exporting
+*            http_status_code = /iwbep/cx_v4_tea=>gcs_http_status_codes-sv_not_implemented
+*            textid           = /iwbep/cx_v4_tea=>entity_type_not_supported
+*            entity_type      = lv_entity_type_name.
+*
+*    endcase.
+
+
+  endmethod.
+
+
+   method /iwbep/if_v4_dp_basic~update_entity.
+
+    data: lv_entity_type_name type /iwbep/if_v4_med_element=>ty_e_med_internal_name.
+
+    io_request->get_entity_type( importing ev_entity_type_name = lv_entity_type_name ).
+
+*    case lv_entity_type_name.
+*
+*      when gcs_entity_type_names-internal-emp.
+*        update_emp(
+*          exporting
+*            io_request  = io_request
+*            io_response = io_response ).
+*
+*      when gcs_entity_type_names-internal-empskill.
+*        update_empskill(
+*          exporting
+*            io_request  = io_request
+*            io_response = io_response ).
+*
+*
+*      when others.
+*
+*        super->/iwbep/if_v4_dp_basic~update_entity(
+*         exporting
+*           io_request  = io_request
+*           io_response = io_response ).
+*
+*    endcase.
+
+  endmethod.
+
+  method read_entity_emp.
+
+    "entity type specific data types
+    data: ls_emp         type gty_cds_views-emp,
+          ls_key_emp     type gty_cds_views-emp,
+          lv_emp_key_edm type string,
+          lv_helper_int         type i.
+    "generic data types
+    data: ls_todo_list type /iwbep/if_v4_requ_basic_read=>ty_s_todo_list,
+          ls_done_list type /iwbep/if_v4_requ_basic_read=>ty_s_todo_process_list.
+
+    io_request->get_todos( importing es_todo_list = ls_todo_list ).
+
+    " read the key data
+    io_request->get_key_data( importing es_key_data = ls_key_emp ).
+    ls_done_list-key_data = abap_true.
+
+    select single * from zaa_c_emp_v4
+    into corresponding fields of @ls_emp
+    where empid = @ls_key_emp-EmpId.
+
+    if ls_emp is not initial.
+      io_response->set_busi_data( is_busi_data = ls_emp ).
+    else.
+      "Move data first to an integer to remove leading zeros from the response
+      lv_emp_key_edm = lv_helper_int = ls_key_emp-EmpId.
+
+      raise exception type zcx_aa_emp
+        exporting
+          textid              = zcx_aa_emp=>entity_not_found
+          http_status_code    = zcx_aa_emp=>gcs_http_status_codes-not_found
+          edm_entity_set_name = gcs_entity_set_names-edm-emp
+          entity_key          = lv_emp_key_edm.
+
+    endif.
+
+    " Report list of request options handled by application
+    io_response->set_is_done( ls_done_list ).
+  endmethod.
+
+  method read_entity_empskill.
+    "entity type specific data types
+    data: ls_empskill         type gty_cds_views-empskill,
+          ls_key_empskill     type gty_cds_views-empskill,
+          lv_key_edm_empskill type string,
+          lv_helper_int             type i.
+    "generic data types
+    data: ls_todo_list type /iwbep/if_v4_requ_basic_read=>ty_s_todo_list,
+          ls_done_list type /iwbep/if_v4_requ_basic_read=>ty_s_todo_process_list.
+
+    io_request->get_todos( importing es_todo_list = ls_todo_list ).
+
+    " read the key data
+    io_request->get_key_data( importing es_key_data = ls_key_empskill ).
+    ls_done_list-key_data = abap_true.
+
+    select single * from zaa_c_empskill_v4
+    into corresponding fields of @ls_empskill
+    where empid = @ls_key_empskill-empid
+    and skillid = @ls_key_empskill-SkillID.
+
+    if ls_empskill is not initial.
+      io_response->set_busi_data( is_busi_data = ls_empskill ).
+    else.
+      "Move data first to an integer to remove leading zeros from the response
+      lv_key_edm_empskill = lv_helper_int = ls_key_empskill-empid.
+      lv_key_edm_empskill = lv_key_edm_empskill && ','.
+      lv_helper_int = ls_key_empskill-Skillid.
+      lv_key_edm_empskill = lv_key_edm_empskill && lv_helper_int.
+
+      raise exception type zcx_aa_emp
+        exporting
+          textid              = zcx_aa_emp=>entity_not_found
+          http_status_code    = zcx_aa_emp=>gcs_http_status_codes-not_found
+          edm_entity_set_name = gcs_entity_set_names-edm-empskill
+          entity_key          = lv_key_edm_empskill.
+
+    endif.
+
+    " Report list of request options handled by application
+    io_response->set_is_done( ls_done_list ).
+  endmethod.
+
+
+
+  method read_list_emp.
+
+    "entity type specific data types
+    data : lt_key_range_emp type ZIF_AA_EMP_ODATA_V4=>gt_key_range-empid,
+           ls_key_range_emp type line of ZIF_AA_EMP_ODATA_V4=>gt_key_range-empid,
+           lt_emp           type standard table of gty_cds_views-emp,
+           lt_key_emp       type standard table of gty_cds_views-emp.
+
+    "generic data types
+    data: ls_todo_list type /iwbep/if_v4_requ_basic_list=>ty_s_todo_list,
+          ls_done_list type /iwbep/if_v4_requ_basic_list=>ty_s_todo_process_list,
+          lv_count     type i,
+          lv_max_index type i.
+
+    " Get the request options the application should/must handle
+    io_request->get_todos( importing es_todo_list = ls_todo_list ).
+
+    " Get the request options the application has already handled
+    ls_done_list = is_done_list.
+
+    " specific sales orders based on navigation?
+    if ls_todo_list-process-key_data = abap_true.
+      io_request->get_key_data( importing et_key_data = lt_key_emp ).
+      loop at lt_key_emp into data(ls_key_entity).
+        append value #( sign = 'I' option = 'EQ' low = ls_key_entity-empid ) to lt_key_range_emp.
+      endloop.
+      ls_done_list-key_data = abap_true.
+    endif.
+
+    "================================================================
+    " read_list must either be called with a filter or via navigation
+    " or $top has to be used to avoid a full table scan
+    if  ls_todo_list-process-filter = abap_false
+    and ls_todo_list-process-key_data = abap_false
+    and iv_top = 0.
+      raise exception type zcx_aa_emp
+        exporting
+          textid              = zcx_aa_emp=>use_filter_top_or_nav
+          http_status_code    = zcx_aa_emp=>gcs_http_status_codes-bad_request
+          edm_entity_set_name = gcs_entity_set_names-edm-emp.
+    endif.
+
+    " Return business data if requested
+    if ls_todo_list-return-busi_data = abap_true.
+
+      " read data from the CDS view
+      "value for max_index must only be calculated if the request also contains a $top
+      if iv_top is not initial.
+        lv_max_index = iv_top + iv_skip.
+      else.
+        lv_max_index = 0.
+      endif.
+
+      select (iv_select_string) from zaa_c_emp_v4
+      where (iv_where_clause)
+      and   empid in @lt_key_range_emp
+      order by (iv_orderby_string)
+      into corresponding fields of table @lt_emp
+      up to @lv_max_index rows.
+
+      "skipping entries specified by $skip
+      "not needed as of NW751 where OFFSET is supported in Open SQL
+      if iv_skip is not initial.
+        delete lt_emp to iv_skip.
+      endif.
+
+*      "OFFSET is only supported as of NW751
+*      SELECT (iv_select_string) FROM ze2e001_c_emp
+*      WHERE (iv_where_clause)
+*      AND   emp IN @lt_emp_key_range
+*      ORDER BY (iv_orderby_string)
+*      INTO CORRESPONDING FIELDS OF TABLE @lt_entity
+*      UP TO @iv_top ROWS
+*      OFFSET @iv_skip.
+
+      io_response->set_busi_data( it_busi_data = lt_emp ).
+
+    else.
+      "if business data is requested count will be calculated by
+      "the framework
+      if ls_todo_list-return-count = abap_true.
+
+        select count( * ) from zaa_c_emp_v4
+            where (iv_where_clause) and
+           empid in @lt_key_range_emp
+            into @lv_count.
+
+        io_response->set_count( lv_count ).
+      endif.
+    endif.
+
+    " Report list of request options handled by application
+    io_response->set_is_done( ls_done_list ).
+  endmethod.
+
+  method read_list_empskill.
+
+    "entity type specific data types
+    data : lt_key_range_emp     type ZIF_AA_EMP_ODATA_V4=>gt_key_range-empid,
+           ls_key_range_emp     type line of ZIF_AA_EMP_ODATA_V4=>gt_key_range-empid,
+           lt_key_range_empskill type ZIF_AA_EMP_ODATA_V4=>gt_key_range-skillid,
+           ls_key_range_empskill type line of ZIF_AA_EMP_ODATA_V4=>gt_key_range-skillid,
+           lt_empskill           type standard table of gty_cds_views-empskill,
+           lt_key_empskill       type standard table of gty_cds_views-empskill.
+
+    "generic data types
+    data: ls_todo_list type /iwbep/if_v4_requ_basic_list=>ty_s_todo_list,
+          ls_done_list type /iwbep/if_v4_requ_basic_list=>ty_s_todo_process_list,
+          lv_count     type i,
+          lv_max_index type i.
+
+    " Get the request options the application should/must handle
+    io_request->get_todos( importing es_todo_list = ls_todo_list ).
+
+    " Get the request options the application has already handled
+    ls_done_list = is_done_list.
+
+    " specific sales orders based on navigation?
+    if ls_todo_list-process-key_data = abap_true.
+      io_request->get_key_data( importing et_key_data = lt_key_empskill ).
+      loop at lt_key_empskill into data(ls_key_entity).
+        append value #( sign = 'I' option = 'EQ' low = ls_key_entity-empid ) to lt_key_range_emp.
+        append value #( sign = 'I' option = 'EQ' low = ls_key_entity-skillid ) to lt_key_range_empskill.
+      endloop.
+
+      "the first key field (salesoder) is always the same
+      delete adjacent duplicates from lt_key_range_emp.
+      ls_done_list-key_data = abap_true.
+    endif.
+
+
+    "================================================================
+    " read_list must either be called with a filter or via navigation
+    " or $top has to be used to avoid a full table scan
+    if  ls_todo_list-process-filter = abap_false
+    and ls_todo_list-process-key_data = abap_false
+    and iv_top = 0.
+      raise exception type zcx_aa_emp
+        exporting
+          textid              = zcx_aa_emp=>use_filter_top_or_nav
+          http_status_code    = zcx_aa_emp=>gcs_http_status_codes-bad_request
+          edm_entity_set_name = gcs_entity_set_names-edm-emp.
+    endif.
+
+    " Return business data if requested
+    if ls_todo_list-return-busi_data = abap_true.
+
+      " read data from the CDS view
+
+*      "OFFSET is only supported as of NW751
+*      SELECT (iv_select_string) FROM ze2e001_c_emp
+*      WHERE (iv_where_clause)
+*      AND   emp IN @lt_emp_key_range
+*      ORDER BY (iv_orderby_string)
+*      INTO CORRESPONDING FIELDS OF TABLE @lt_entity
+*      UP TO @iv_top ROWS
+*      OFFSET @iv_skip.
+
+      "value for max_index must only be calculated if the request also contains a $top
+      if iv_top is not initial.
+        lv_max_index = iv_top + iv_skip.
+      else.
+        lv_max_index = 0.
+      endif.
+
+      select (iv_select_string) from zaa_c_empskill_v4
+      where (iv_where_clause)
+      and   empid in @lt_key_range_emp
+      and   skillid in @lt_key_range_empskill
+      order by (iv_orderby_string)
+      into corresponding fields of table @lt_empskill
+      up to @lv_max_index rows.
+
+      "skipping entries specified by $skip
+      "not needed as of NW751 where OFFSET is supported in Open SQL
+      if iv_skip is not initial.
+        delete lt_empskill to iv_skip.
+      endif.
+
+      io_response->set_busi_data( it_busi_data = lt_empskill ).
+
+    else.
+      "if business data is requested count will be calculated by
+      "the framework
+      if ls_todo_list-return-count = abap_true.
+
+        select count( * ) from zaa_c_empskill_v4
+            where (iv_where_clause)
+            and   empid in @lt_key_range_emp
+            and   skillid in @lt_key_range_empskill
+            into @lv_count.
+
+        io_response->set_count( lv_count ).
+      endif.
+    endif.
+
+    " Report list of request options handled by application
+    io_response->set_is_done( ls_done_list ).
+
+  endmethod.
+
+  method read_ref_key_list_emp.
+
+    "entity type specific data types
+    data: ls_emp_key_data     type  gty_cds_views-emp,
+          lt_empskill_key_data type standard table of gty_cds_views-empskill,
+          ls_todo_list               type /iwbep/if_v4_requ_basic_ref_l=>ty_s_todo_list.
+    "generic data types
+    data: ls_done_list         type /iwbep/if_v4_requ_basic_ref_l=>ty_s_todo_process_list,
+          lv_nav_property_name type /iwbep/if_v4_med_element=>ty_e_med_internal_name.
+
+    " Get the request options the application should/must handle
+    io_request->get_todos( importing es_todo_list = ls_todo_list ).
+
+    if ls_todo_list-process-source_key_data = abap_true.
+      io_request->get_source_key_data( importing es_source_key_data =  ls_emp_key_data ).
+      ls_done_list-source_key_data = abap_true.
+    endif.
+
+    io_request->get_navigation_prop( importing ev_navigation_prop_name = lv_nav_property_name ).
+
+    case lv_nav_property_name.
+      when gcs_nav_prop_names-internal-emp_to_skills.
+
+        select empid , skillid from zaa_c_empskill_v4
+        into corresponding fields of table @lt_empskill_key_data
+        where empid = @ls_emp_key_data-empid.
+
+        io_response->set_target_key_data( lt_empskill_key_data ).
+
+      when others.
+
+        raise exception type zcx_aa_emp
+          exporting
+            http_status_code = zcx_aa_emp=>gcs_http_status_codes-sv_not_implemented.
+
+    endcase.
+
+    " Report list of request options handled by application
+    io_response->set_is_done( ls_done_list ).
+
+
+  endmethod.
+
+
+ENDCLASS.

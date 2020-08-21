@@ -1,0 +1,12 @@
+http://pgissf201a.casa.intra.saaq.net:8061/sap/opu/odata4/sap/zaa_odata_v4/default/sap/zaa_emp_v4/0001/$metadata?sap-statistics=true
+
+
+http://pgissf201a.casa.intra.saaq.net:8061/sap/opu/odata4/sap/zaa_odata_v4/default/sap/zaa_emp_v4/0001/Emp?$top=2&sap-ds-debug=true
+
+http://pgissf201a.casa.intra.saaq.net:8061/sap/opu/odata4/sap/zaa_odata_v4/default/sap/zaa_emp_v4/0001/Emp(1)?sap-ds-debug=true
+
+http://pgissf201a.casa.intra.saaq.net:8061/sap/opu/odata4/sap/zaa_odata_v4/default/sap/zaa_emp_v4/0001/Emp(1)/_EmpSkill?sap-ds-debug=true
+
+http://pgissf201a.casa.intra.saaq.net:8061/sap/opu/odata4/sap/zaa_odata_v4/default/sap/zaa_emp_v4/0001/Emp(1)?$expand=_EmpSkill&sap-ds-debug=true
+
+
