@@ -1,0 +1,15 @@
+@EndUserText.label : 'Employee Type'
+@AbapCatalog.enhancementCategory : #NOT_EXTENSIBLE
+@AbapCatalog.tableCategory : #TRANSPARENT
+@AbapCatalog.deliveryClass : #A
+@AbapCatalog.dataMaintenance : #RESTRICTED
+define table zaa_t_emptype {
+  key client    : abap.clnt not null;
+  key etype     : abap.char(1) not null;
+  etypedesc     : abap.char(30);
+  active        : abap.char(1);
+  used          : abap.char(1);
+  lastchangeby  : syuname;
+  lastchangedat : timestampl;
+
+}

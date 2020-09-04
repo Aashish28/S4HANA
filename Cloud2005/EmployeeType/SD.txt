@@ -1,0 +1,4 @@
+@EndUserText.label: 'Employee type service defination'
+define service ZAA_EMPTYPE_SD {
+  expose ZAA_EMPTYPE_CDS as EmployeeType;
+}

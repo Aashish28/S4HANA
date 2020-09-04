@@ -1,0 +1,49 @@
+
+@AbapCatalog.sqlViewName: 'ZAA_SKILL_VIEW'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Skill master CDS'
+
+@UI:
+{
+ headerInfo:
+  {
+    typeName: 'Skill',
+    typeNamePlural: 'Skills',
+    title: { type: #STANDARD, value: 'sid' },
+    description : { type: #STANDARD , value: 'sname' } 
+  }
+ }
+
+@ObjectModel.semanticKey: ['sid']
+@ObjectModel.representativeKey: 'sid'
+
+define root view ZAA_SKILL_CDS as select from zaa_t_skill {
+
+      @UI.facet: [
+      {
+       id:       'Skill',
+       purpose:  #STANDARD,
+       type:     #IDENTIFICATION_REFERENCE,
+       label:    'Skill Maintenance',
+       position: 10 }
+      ]
+
+    //zaa_t_emptype
+      @UI: {
+          lineItem: [ { position: 10, importance: #HIGH, label: 'Skill Id' } ]
+          }
+    key sid,
+      @UI: {
+        lineItem: [ { position: 20, label: 'Skill Name', importance: #HIGH } ],
+        identification:[ { position: 20, label: 'Skill Name' }],
+        selectionField: [{ position: 10 }]
+      }
+    sname,
+      @UI: {
+        lineItem: [ { position: 30, label: 'Set Active', importance: #HIGH , 
+             type: #FOR_ACTION , dataAction: 'set_active' }]
+      }
+    active
+}

@@ -1,0 +1,174 @@
+CLASS lhc_ZAA_EMPTYPE_CDS DEFINITION INHERITING FROM cl_abap_behavior_handler.
+  PRIVATE SECTION.
+
+    METHODS validation_etype FOR VALIDATE ON SAVE
+      IMPORTING keys FOR ZAA_EMPTYPE_CDS~validation_etype.
+    METHODS calculate_used FOR DETERMINE on modify
+    importing keys for zaa_emptype_cds~calculate_used.
+    METHODS set_active FOR MODIFY IMPORTING keys FOR ACTION zaa_emptype_cds~set_active RESULT et_etype_action.
+    METHODS set_deactive FOR MODIFY IMPORTING keys FOR ACTION zaa_emptype_cds~set_deactive RESULT et_etype_action.
+    METHODS get_features for features importing keys request requested_features for zaa_emptype_cds result et_etype_feature.
+
+ENDCLASS.
+
+CLASS lhc_ZAA_EMPTYPE_CDS IMPLEMENTATION.
+
+  METHOD validation_etype.
+
+   READ ENTITIES OF zaa_emptype_cds IN LOCAL MODE
+    ENTITY zaa_emptype_cds
+     FIELDS ( etype )
+     WITH CORRESPONDING #(  keys )
+    RESULT DATA(lt_emptype)
+    failed data(lt_emptype_failed)
+    reported data(lt_emptype_reported).
+
+*  read entity zaa_emptype_cds from value #(
+*         for keyval in keys ( %key = keyval
+*           %control = value #(
+*                etype = if_abap_behv=>mk-on ) ) )
+*       result data(lt_emptype)
+*       failed data(lt_emptype_failed)
+*       reported data(lt_emptype_reported).
+
+       loop at lt_emptype into data(ls_emptype).
+        if ls_emptype-etype is not initial and ls_emptype-etype eq 'X'.
+          APPEND value #( etype = ls_emptype-etype ) to failed-zaa_emptype_cds.
+          APPEND value #( etype = ls_emptype-etype
+                          %msg = new_message_with_text( text = 'Invalid employee type'
+                          severity  = if_abap_behv_message=>severity-error )
+                          %element-etype = if_abap_behv=>mk-on
+                        ) to reported-zaa_emptype_cds.
+        else.
+           SELECT count( * ) FROM zaa_t_emptype
+             WHERE etype = @ls_emptype-etype into @data(lv_emptype_exist).
+             if sy-subrc = 0 .
+              APPEND value #( etype = ls_emptype-etype ) to failed-zaa_emptype_cds.
+              APPEND value #( etype = ls_emptype-etype
+                              %msg = new_message_with_text( text = | Employee type { ls_emptype-etype } already exist |
+                              severity  = if_abap_behv_message=>severity-error )
+                              %element-etype = if_abap_behv=>mk-on
+                            ) to reported-zaa_emptype_cds.
+             endif.
+
+        endif.
+       endloop.
+
+  ENDMETHOD.
+
+  METHOD calculate_used.
+
+   READ ENTITIES OF zaa_emptype_cds IN LOCAL MODE
+    ENTITY zaa_emptype_cds
+     FIELDS ( etype )
+     WITH CORRESPONDING #(  keys )
+    RESULT DATA(lt_emptype)
+    failed data(lt_emptype_failed)
+    reported data(lt_emptype_reported).
+
+*       read entities of zaa_emptype_cds
+*       entity zaa_emptype_cds from value #(
+*         for keyval in keys ( etype = keyval
+*           %control-used = if_abap_behv=>mk-on ) )
+*       result data(lt_emptype)
+*       failed data(lt_emptype_failed)
+*       reported data(lt_emptype_reported).
+
+
+     LOOP AT keys INTO DATA(ls_key).
+        select count( * ) from zaa_t_emp
+            where etype = @ls_key-etype
+            into @data(lv_count).
+
+         data(lv_used)  = COND #( when lv_count > 0 then abap_true
+                                  else abap_false ).
+
+        MODIFY ENTITIES OF zaa_emptype_cds  IN LOCAL MODE
+          ENTITY zaa_emptype_cds
+          UPDATE FROM value #( for ls_emptype in lt_emptype (
+            etype = ls_emptype-etype
+            used = lv_used
+            %control-used = if_abap_behv=>mk-on
+          ) ).
+    ENDLOOP.
+
+  ENDMETHOD.
+
+  METHOD get_features.
+
+    read entity zaa_emptype_cds
+        fields ( etype used ) with value #( for keyval in keys ( %key = keyval-%key ) )
+        result data(lt_etype).
+
+        et_etype_feature = value #( for ls_etype in lt_etype (
+                %key = ls_etype-%key
+                %field-etype = if_abap_behv=>fc-f-read_only
+                %features-%delete = cond #( when ls_etype-used eq abap_true
+                                    then if_abap_behv=>fc-o-disabled
+                                  else if_abap_behv=>fc-o-enabled
+                                )
+                %features-%action-set_deactive = cond #( when ls_etype-used eq abap_true
+                                    then if_abap_behv=>fc-o-disabled
+                                  else if_abap_behv=>fc-o-enabled
+                                )
+        ) ).
+
+  ENDMETHOD.
+
+  METHOD set_active.
+  " Modify in local mode
+    MODIFY ENTITIES OF zaa_emptype_cds IN LOCAL MODE
+           ENTITY zaa_emptype_cds
+              UPDATE FROM VALUE #( for key in keys ( etype = key-etype
+                                                     active = abap_true " activated
+                                                     %control-active = if_abap_behv=>mk-on ) )
+           FAILED   failed
+           REPORTED reported.
+
+
+    " Read changed data for action result
+    READ ENTITIES OF zaa_emptype_cds IN LOCAL MODE
+         ENTITY zaa_emptype_cds
+           FIELDS ( etype
+                    etypedesc
+                    active
+                    used
+                    lastchangedat
+                    lastchangeby )
+             WITH VALUE #( FOR key IN keys ( etype = key-etype ) )
+         RESULT DATA(lt_emptype).
+
+    et_etype_action = VALUE #( FOR ls_etype IN lt_emptype ( etype = ls_etype-etype
+                                                %param    = ls_etype ) ).
+
+  ENDMETHOD.
+
+  METHOD set_deactive.
+  " Modify in local mode
+    MODIFY ENTITIES OF zaa_emptype_cds IN LOCAL MODE
+           ENTITY zaa_emptype_cds
+              UPDATE FROM VALUE #( for key in keys ( etype = key-etype
+                                                     active = abap_false " deactivated
+                                                     %control-active = if_abap_behv=>mk-on ) )
+           FAILED   failed
+           REPORTED reported.
+
+
+    " Read changed data for action result
+    READ ENTITIES OF zaa_emptype_cds IN LOCAL MODE
+         ENTITY zaa_emptype_cds
+           FIELDS ( etype
+                    etypedesc
+                    active
+                    used
+                    lastchangedat
+                    lastchangeby )
+             WITH VALUE #( FOR key IN keys ( etype = key-etype ) )
+         RESULT DATA(lt_emptype).
+
+    et_etype_action = VALUE #( FOR ls_etype IN lt_emptype ( etype = ls_etype-etype
+                                                %param    = ls_etype ) ).
+
+  ENDMETHOD.
+
+ENDCLASS.

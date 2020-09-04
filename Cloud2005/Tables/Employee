@@ -1,0 +1,24 @@
+@EndUserText.label : 'Employee table'
+@AbapCatalog.enhancementCategory : #NOT_EXTENSIBLE
+@AbapCatalog.tableCategory : #TRANSPARENT
+@AbapCatalog.deliveryClass : #A
+@AbapCatalog.dataMaintenance : #ALLOWED
+define table zaa_t_emp {
+  key client    : abap.clnt not null;
+  key eid       : abap.int4 not null;
+  efname        : abap.char(30);
+  elname        : abap.char(30);
+  edept         : abap.char(10);
+  egender       : abap.char(1);
+  etype         : abap.char(1);
+  email         : abap.char(50);
+  currencycode  : abap.cuky;
+  @Semantics.amount.currencyCode : 'zaa_t_emp.currencycode'
+  esalary       : abap.curr(15,2);
+  country       : abap.char(30);
+  favorite      : abap.char(1);
+  dob           : abap.dats;
+  lastchangeby  : syuname;
+  lastchangedat : timestampl;
+
+}

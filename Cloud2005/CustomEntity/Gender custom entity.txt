@@ -1,0 +1,9 @@
+@EndUserText.label: 'Gender CDS'
+@ObjectModel.query.implementedBy: 'ABAP:ZCL_AA_CE_GENDER_R'
+define custom entity ZAA_CE_GENDER_R {
+      @EndUserText.label: 'Gender'
+  key egender : abap.char(1);
+      @Semantics.text: true
+      @EndUserText.label: 'Description'
+      egenderdesc : abap.char(20);  
+}

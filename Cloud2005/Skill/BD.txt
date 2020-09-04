@@ -1,0 +1,14 @@
+unmanaged;
+
+define behavior for ZAA_SKILL_CDS
+implementation in class zbp_aa_skill_cds unique //alias <alias_name>
+//late numbering
+//lock master
+//etag master <field_name>
+{
+  field (mandatory) sname;
+  create;
+  update;
+  delete;
+  action set_active result[1] $self;
+}

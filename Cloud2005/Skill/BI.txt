@@ -1,0 +1,191 @@
+CLASS lcl_buffer DEFINITION.
+* 1) define the data buffer
+  PUBLIC SECTION.
+
+    TYPES: BEGIN OF ty_buffer.
+        INCLUDE TYPE   zaa_t_skill AS data.
+    TYPES: flag TYPE c LENGTH 1,
+           END OF ty_buffer.
+
+    TYPES tt_skill TYPE SORTED TABLE OF ty_buffer WITH UNIQUE KEY sid.
+
+    CLASS-DATA mt_buffer TYPE tt_skill.
+ENDCLASS.
+
+CLASS lhc_ZAA_SKILL_CDS DEFINITION INHERITING FROM cl_abap_behavior_handler.
+  PRIVATE SECTION.
+
+    METHODS create FOR MODIFY
+      IMPORTING it_skill_create FOR CREATE zaa_skill_cds.
+
+    METHODS delete FOR MODIFY
+      IMPORTING it_skill_delete FOR DELETE zaa_skill_cds.
+
+    METHODS update FOR MODIFY
+      IMPORTING it_skill_update FOR UPDATE zaa_skill_cds.
+
+    METHODS read FOR READ
+      IMPORTING it_skill_read FOR READ zaa_skill_cds RESULT result.
+
+    METHODS set_active FOR MODIFY IMPORTING it_skill_action FOR ACTION zaa_skill_cds~set_active RESULT et_skill_action.
+
+ENDCLASS.
+
+CLASS lhc_ZAA_SKILL_CDS IMPLEMENTATION.
+
+  METHOD create.
+      IF it_skill_create IS NOT INITIAL.
+      SELECT SINGLE MAX( sid ) FROM zaa_t_skill INTO @DATA(lv_max_sid).
+    ENDIF.
+
+    LOOP AT it_skill_create INTO DATA(ls_create).
+      lv_max_sid = lv_max_sid + 1.
+      ls_create-%data-sid = lv_max_sid.
+      INSERT VALUE #( flag = 'C' data = CORRESPONDING #( ls_create-%data ) ) INTO TABLE lcl_buffer=>mt_buffer.
+
+      IF ls_create-%cid IS NOT INITIAL.
+        INSERT VALUE #( %cid = ls_create-%cid  sid = ls_create-sid ) INTO TABLE mapped-zaa_skill_cds.
+      ENDIF.
+    ENDLOOP.
+
+  ENDMETHOD.
+
+  METHOD delete.
+
+    LOOP AT it_skill_delete INTO DATA(ls_delete).
+      IF ls_delete-sid IS INITIAL.
+        ls_delete-sid = mapped-zaa_skill_cds[ %cid = ls_delete-%cid_ref ]-sid.
+      ENDIF.
+
+      READ TABLE lcl_buffer=>mt_buffer WITH KEY sid = ls_delete-sid ASSIGNING field-symbol(<ls_buffer>).
+      IF sy-subrc = 0.
+        IF <ls_buffer>-flag = 'C'.
+          DELETE TABLE lcl_buffer=>mt_buffer WITH TABLE KEY sid = ls_delete-sid.
+        ELSE.
+          <ls_buffer>-flag = 'D'.
+        ENDIF.
+      ELSE.
+        INSERT VALUE #( flag = 'D' sid = ls_delete-sid ) INTO TABLE lcl_buffer=>mt_buffer.
+      ENDIF.
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD update.
+
+  IF it_skill_update IS NOT INITIAL.
+      LOOP AT it_skill_update INTO DATA(ls_update).
+        IF ls_update-sid IS INITIAL.
+          ls_update-sid = mapped-zaa_skill_cds[ %cid = ls_update-%cid_ref ]-sid.
+        ENDIF.
+
+        READ TABLE lcl_buffer=>mt_buffer WITH KEY sid = ls_update-sid ASSIGNING FIELD-SYMBOL(<ls_buffer>).
+        IF sy-subrc <> 0.
+
+          SELECT SINGLE * FROM zaa_t_skill WHERE sid = @ls_update-sid INTO @DATA(ls_db).
+          INSERT VALUE #( flag = 'U' data = ls_db ) INTO TABLE lcl_buffer=>mt_buffer ASSIGNING <ls_buffer>.
+        ENDIF.
+
+        IF ls_update-%control-sname IS NOT INITIAL.
+          <ls_buffer>-sname = ls_update-sname.
+        ENDIF.
+
+      ENDLOOP.
+    ENDIF.
+
+  ENDMETHOD.
+
+  METHOD read.
+  LOOP AT it_skill_read INTO DATA(ls_skill_key).
+      " check if it is in buffer (and not deleted).
+      READ TABLE lcl_buffer=>mt_buffer WITH KEY sid = ls_skill_key-sid INTO DATA(ls_skill).
+      IF sy-subrc = 0 AND ls_skill-flag <> 'U'.
+        INSERT CORRESPONDING #( ls_skill-data ) INTO TABLE result.
+      ELSE.
+        SELECT SINGLE * FROM zaa_t_skill WHERE sid = @ls_skill_key-sid INTO @DATA(ls_db).
+        IF sy-subrc = 0.
+          INSERT CORRESPONDING #( ls_db ) INTO TABLE result.
+        ELSE.
+          INSERT VALUE #( sid = ls_skill_key-sid ) INTO TABLE failed-zaa_skill_cds.
+        ENDIF.
+      ENDIF.
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD set_active.
+
+
+  LOOP AT it_skill_action ASSIGNING FIELD-SYMBOL(<fs_skill_set_active>).
+
+      DATA(lv_sid) = <fs_skill_set_active>-sid.
+      SELECT SINGLE * from zaa_t_skill where sid = @lv_sid
+      into @data(ls_skill).
+
+     INSERT VALUE #( flag = 'U' data = ls_skill ) INTO TABLE lcl_buffer=>mt_buffer ASSIGNING  FIELD-SYMBOL(<ls_buffer>).
+        <ls_buffer>-active = abap_true.
+
+  ENDLOOP.
+
+*  " Modify in local mode
+*    MODIFY ENTITIES OF zaa_skill_cds IN LOCAL MODE
+*           ENTITY zaa_skill_cds
+*              UPDATE FROM VALUE #( for key in it_skill_action ( sid = key-sid
+*                                                     active = abap_true " activated
+*                                                     %control-active = if_abap_behv=>mk-on ) )
+*           FAILED   failed
+*           REPORTED reported.
+*
+*
+    " Read changed data for action result
+    READ ENTITIES OF zaa_skill_cds IN LOCAL MODE
+         ENTITY zaa_skill_cds
+           FIELDS ( sid
+                    sname
+                    active
+                  )
+             WITH VALUE #( FOR key IN it_skill_action ( sid = key-sid ) )
+         RESULT DATA(lt_skill_read).
+
+    et_skill_action = VALUE #( FOR ls_skill_read IN lt_skill_read ( sid = ls_skill_read-sid
+                                                %param    = ls_skill_read ) ).
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+CLASS lsc_ZAA_SKILL_CDS DEFINITION INHERITING FROM cl_abap_behavior_saver.
+  PROTECTED SECTION.
+
+    METHODS check_before_save REDEFINITION.
+
+    METHODS finalize          REDEFINITION.
+
+    METHODS save              REDEFINITION.
+
+ENDCLASS.
+
+CLASS lsc_ZAA_SKILL_CDS IMPLEMENTATION.
+
+  METHOD check_before_save.
+  ENDMETHOD.
+
+  METHOD finalize.
+  ENDMETHOD.
+
+  METHOD save.
+  DATA lt_data TYPE STANDARD TABLE OF zaa_t_skill.
+
+    lt_data = VALUE #(  FOR row IN lcl_buffer=>mt_buffer WHERE  ( flag = 'C' ) (  row-data ) ).
+    IF lt_data IS NOT INITIAL.
+      INSERT zaa_t_skill FROM TABLE @lt_data.
+    ENDIF.
+    lt_data = VALUE #(  FOR row IN lcl_buffer=>mt_buffer WHERE  ( flag = 'U' ) (  row-data ) ).
+    IF lt_data IS NOT INITIAL.
+      UPDATE zaa_t_skill FROM TABLE @lt_data.
+    ENDIF.
+    lt_data = VALUE #(  FOR row IN lcl_buffer=>mt_buffer WHERE  ( flag = 'D' ) (  row-data ) ).
+    IF lt_data IS NOT INITIAL.
+      DELETE zaa_t_skill FROM TABLE @lt_data.
+    ENDIF.
+  ENDMETHOD.
+
+ENDCLASS.

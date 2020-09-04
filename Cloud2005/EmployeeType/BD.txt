@@ -1,0 +1,20 @@
+managed;
+
+define behavior for ZAA_EMPTYPE_CDS //alias <alias_name>
+implementation in class zbp_aa_emptype_cds unique
+persistent table zaa_t_emptype
+//late numbering
+lock master
+//authorization master
+etag master lastchangedat
+{
+  field ( features : instance ) etype;
+  validation validation_etype on save { field etype; }
+  determination calculate_used on modify { field etypedesc; }
+  create;
+  update;
+  delete ( features : instance );
+  action set_active result[1] $self;
+  action ( features : instance ) set_deactive result[1] $self;
+
+}

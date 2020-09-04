@@ -1,0 +1,12 @@
+@EndUserText.label : 'Skill master table'
+@AbapCatalog.enhancementCategory : #NOT_EXTENSIBLE
+@AbapCatalog.tableCategory : #TRANSPARENT
+@AbapCatalog.deliveryClass : #A
+@AbapCatalog.dataMaintenance : #ALLOWED
+define table zaa_t_skill {
+  key client : abap.clnt not null;
+  key sid    : abap.int4 not null;
+  sname      : abap.char(30);
+  active     : abap.char(1);
+
+}

@@ -1,0 +1,4 @@
+@EndUserText.label: 'Skill service defination'
+define service ZAA_SKILL_SD {
+  expose ZAA_SKILL_CDS;
+}
