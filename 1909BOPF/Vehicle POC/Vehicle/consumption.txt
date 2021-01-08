@@ -46,6 +46,7 @@ association [0..1] to I_Customer as _OwnerVh
  @ObjectModel.virtualElement: true
  @ObjectModel.virtualElementCalculatedBy: 'YZA_CL_RATING'
  cast( 0 as abap.int4 ) as VehRating,
+ reason,
  crea_date_time,
  crea_uname,
  lchg_date_time,

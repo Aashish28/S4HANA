@@ -1,0 +1,43 @@
+@AbapCatalog.sqlViewName: 'YZA_CAQ_VEH'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Vehicle Analytic query'
+@VDM.viewType: #CONSUMPTION
+@Analytics.query: true
+@OData.publish: true
+
+@Metadata.allowExtensions: true
+define view YZA_C_AQ_VEH as select from YZA_I_AC_VEH {
+    
+    @AnalyticsDetails.query.display: #KEY_TEXT
+    @AnalyticsDetails.query.axis: #FREE
+    Color,
+    @AnalyticsDetails.query.display: #KEY_TEXT
+    @AnalyticsDetails.query.axis: #FREE
+    FuleType,
+    @AnalyticsDetails.query.display: #KEY_TEXT
+    @AnalyticsDetails.query.axis: #FREE
+    ManufYear,
+    @AnalyticsDetails.query.display: #KEY_TEXT
+    @AnalyticsDetails.query.axis: #FREE
+    Manufacturer,
+    @AnalyticsDetails.query.display: #KEY_TEXT
+    @AnalyticsDetails.query.axis: #FREE
+    VehicleStatus,
+    @AnalyticsDetails.query.display: #KEY_TEXT
+    @AnalyticsDetails.query.axis: #FREE
+    VehicleType,
+//    @AnalyticsDetails.query.display: #KEY_TEXT
+//    @AnalyticsDetails.query.axis: #FREE
+//    VehRating,
+    TotalVehicle,
+    
+    @EndUserText.label: 'Average Vehicle Per Year'
+    @AnalyticsDetails.exceptionAggregationSteps.exceptionAggregationBehavior: #AVG
+    @AnalyticsDetails.exceptionAggregationSteps.exceptionAggregationElements: [ 'ManufYear' ]
+    @AnalyticsDetails.query.formula: '$projection.TotalVehicle'
+    @AnalyticsDetails.query.decimals: 0
+    0 as AverageVehiclePerYear
+    
+}

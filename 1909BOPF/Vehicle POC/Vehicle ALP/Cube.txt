@@ -1,0 +1,42 @@
+@AbapCatalog.sqlViewName: 'YZA_IAC_VEH'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Vehicle Type Cube'
+@Analytics.dataCategory: #CUBE
+
+define view YZA_I_AC_VEH as select from YZA_C_VEH 
+    association [0..1] to YZA_I_AD_VEHTYPE as _vehTypeDim on $projection.VehicleType = _vehTypeDim.VehicleType    
+    {
+    
+     @EndUserText.label: 'Id'
+    VehicleId,
+     @EndUserText.label: 'Name'
+    VehicleName,
+     @EndUserText.label: 'No'
+    VehicleNo,
+    @EndUserText.label: 'Owner'
+    Owner,
+     @EndUserText.label: 'Color'
+    Color,
+    CC,
+     @EndUserText.label: 'Fule Type'
+    FuleType,
+     @EndUserText.label: 'Manuf. Year'
+    ManufYear,
+     @EndUserText.label: 'Manufacturer'
+    Manufacturer,
+     @EndUserText.label: 'Status'
+    VehicleStatus,
+     @EndUserText.label: 'Type'
+    VehicleType,
+    VehRating,
+    
+    @EndUserText.label: 'Total Vehicle'
+    @DefaultAggregation: #SUM
+    1 as TotalVehicle,
+    
+     _VehTypeVh,
+     _FuleTypeVh,
+     _OwnerVh
+}

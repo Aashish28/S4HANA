@@ -1,0 +1,24 @@
+@AbapCatalog.sqlViewName: 'YZA_COWNER'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Owner CDS'
+
+@OData.publish: true
+
+@Metadata.allowExtensions: true
+define view YZA_C_OWNER as select from I_Customer 
+association [0..*] to YZA_C_VEH as _Vehicle 
+    on $projection.Customer = _Vehicle.Owner 
+{
+
+key Customer,
+    CustomerName,
+    Country,
+    CityName,
+    PostalCode,
+    StreetName,
+    Region,
+    
+    _Vehicle
+}

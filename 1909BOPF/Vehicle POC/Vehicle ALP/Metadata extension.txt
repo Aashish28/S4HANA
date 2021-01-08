@@ -1,0 +1,160 @@
+@Metadata.layer: #CUSTOMER
+
+@UI.selectionPresentationVariant: [{
+    qualifier: 'KPIVehicleByFuleType',
+    presentationVariantQualifier: 'KPIVehicleByFuleType',
+    selectionVariantQualifier: 'KPIVehicleByFuleType'
+},{
+    qualifier: 'Default',
+    presentationVariantQualifier: 'Default',
+    selectionVariantQualifier: 'Default'
+}]
+
+@UI.presentationVariant: [{
+    qualifier: 'KPIVehicleByFuleType',
+    text: 'KPI: VehicleByType',
+    visualizations: [{
+        type: #AS_CHART,
+        qualifier: 'ChartVehicleByFuleType'
+    },{
+        type: #AS_DATAPOINT,
+        qualifier: 'TotalVehicle'
+    }]
+},
+{
+    qualifier: 'FilterVehicleByType',
+    text: 'Filter: Vehicle by Type',
+    visualizations: [{
+        type: #AS_CHART,
+        qualifier: 'ChartVehicleByType'
+    }]
+},
+{
+    qualifier: 'FilterVehicleByYear',
+    text: 'Filter: Vehicle by Year',
+    visualizations: [{
+        type: #AS_CHART,
+        qualifier: 'ChartVehicleByYear'
+    }]
+},
+{
+    qualifier: 'FilterVehicleByStatus',
+    text: 'Filter: Vehicle by Status',
+    visualizations: [{
+        type: #AS_CHART,
+        qualifier: 'ChartVehicleByStatus'
+    }]
+},
+{
+    qualifier: 'Default',
+    visualizations: [{
+        type: #AS_CHART,
+        qualifier: 'ChartDefault'
+    }]
+}]
+
+@UI.selectionVariant: [{
+    qualifier: 'KPIVehicleByFuleType',
+    text: 'Default'
+},{
+    qualifier: 'Default',
+    text: 'Default'
+}]
+
+
+@UI.chart: [{
+    qualifier: 'ChartVehicleByType',
+    chartType: #COLUMN,
+    dimensions:  [ 'VehicleType' ], 
+    measures:  [ 'TotalVehicle' ],
+    dimensionAttributes: [{
+        dimension: 'VehicleType',
+        role: #CATEGORY
+    }],
+    measureAttributes: [{
+        measure: 'TotalVehicle',
+        role: #AXIS_1
+    }]
+},
+{
+    qualifier: 'ChartVehicleByFuleType',
+    chartType: #COLUMN,
+    dimensions:  [ 'FuleType' ], 
+    measures:  [ 'TotalVehicle' ],
+    dimensionAttributes: [{
+        dimension: 'FuleType',
+        role: #CATEGORY
+    }],
+    measureAttributes: [{
+        measure: 'TotalVehicle',
+        role: #AXIS_1
+    }]
+},
+{
+    qualifier: 'ChartVehicleByYear',
+    chartType: #LINE,
+    dimensions:  [ 'ManufYear' ], 
+    measures:  [ 'TotalVehicle' ],
+    dimensionAttributes: [{
+        dimension: 'ManufYear',
+        role: #CATEGORY
+    }],
+    measureAttributes: [{
+        measure: 'TotalVehicle',
+        role: #AXIS_1
+    }]
+},
+{ 
+ qualifier: 'ChartVehicleByStatus',
+    chartType: #DONUT,
+    dimensions:  [ 'VehicleStatus' ], 
+    measures:  [ 'TotalVehicle' ],
+    dimensionAttributes: [{
+        dimension: 'VehicleStatus',
+        role: #CATEGORY
+    }],
+    measureAttributes: [{
+        measure: 'TotalVehicle',
+        role: #AXIS_1
+    }]
+},
+{
+    qualifier: 'ChartDefault',
+    chartType: #COLUMN,
+    dimensions:  [ 'VehicleType', 'ManufYear' ], 
+    measures:  [ 'TotalVehicle' ],
+    dimensionAttributes: [{
+        dimension: 'ManufYear',
+        role: #SERIES
+    },{
+        dimension: 'VehicleType',
+        role: #CATEGORY
+    }],
+    measureAttributes: [{
+        measure: 'TotalVehicle',
+        role: #AXIS_1
+    }]
+}]
+
+annotate view YZA_C_AQ_VEH
+    with 
+{
+    
+    @UI: {
+        lineItem: [{position : 10 , label: 'Vehicle Type'}], 
+        selectionField: [ { position: 10 } ]
+    } 
+    VehicleType;
+    
+    @UI: {
+        selectionField: [ { position: 20 } ]
+    } 
+    ManufYear;
+
+    @UI.dataPoint.title: 'Total Vehicle'  
+    @UI: {
+        lineItem: [{position : 20 , label: 'Total Vehicle' }]
+    }    
+    TotalVehicle;
+        
+}

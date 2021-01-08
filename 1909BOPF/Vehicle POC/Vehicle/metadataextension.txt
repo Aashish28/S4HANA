@@ -51,7 +51,9 @@ annotate view YZA_C_VEH
     VehicleId;
     @EndUserText.label: 'Vehicle Name' 
      @UI: {
-        lineItem: [ { position: 20, label: 'Vehicle Name', importance: #HIGH }],
+        lineItem: [ { position: 20, label: 'Vehicle Name', importance: #HIGH },
+                  { type: #FOR_ACTION, position: 1, dataAction: 'BOPF:SET_SCRAPPED', label: 'Set Scrapped', importance: #HIGH }       
+        ],
         identification:[ { position: 10, label: 'Vehicle Name' } ],
         fieldGroup:[{ qualifier: 'VehicleData', position: 10}]
     }

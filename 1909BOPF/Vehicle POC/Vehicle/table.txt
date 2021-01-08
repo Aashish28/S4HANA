@@ -17,6 +17,7 @@ define table yza_t_veh {
   mf        : char10;
   vehstatus : char1;
   vehtype   : char2;
+  reason    : yza_de_reason;
   include /bobf/s_lib_admin_data;
 
 }

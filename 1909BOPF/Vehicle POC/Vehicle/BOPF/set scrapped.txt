@@ -1,0 +1,53 @@
+class YCL_ZA_A_SET_SCRAPPED definition
+  public
+  inheriting from /BOBF/CL_LIB_A_SUPERCL_SIMPLE
+  final
+  create public .
+
+public section.
+
+  methods /BOBF/IF_FRW_ACTION~EXECUTE
+    redefinition .
+protected section.
+private section.
+ENDCLASS.
+
+
+
+CLASS YCL_ZA_A_SET_SCRAPPED IMPLEMENTATION.
+
+
+  method /BOBF/IF_FRW_ACTION~EXECUTE.
+ " Typed with node's combined table type
+    " Separate the keys
+    " ------------------------------------------------------------------------------------------
+    /bobf/cl_lib_draft_active=>get_instance( is_ctx-bo_key )->separate_keys(
+      EXPORTING
+        iv_node_key   = is_ctx-node_key
+        it_key        = it_key
+      IMPORTING
+        et_active_key = DATA(lt_active_key)
+    ).
+
+    CHECK lt_active_key IS NOT INITIAL.
+
+    DATA: lt_sales_order TYPE ytzai_veh.
+
+    /bobf/cl_lib_legacy_key=>get_instance( is_ctx-bo_key )->convert_bopf_to_legacy_keys(
+      EXPORTING
+        iv_node_key   = is_ctx-node_key
+        it_bopf_key   = lt_active_key
+      IMPORTING
+        et_legacy_key = lt_sales_order
+    ).
+
+         assign is_parameters->* to field-symbol(<lfs_reason>).
+         data lv_reason type char60.
+                lv_reason = <lfs_reason>.
+
+    LOOP AT lt_sales_order REFERENCE INTO DATA(ls_salesorder).
+      UPDATE yza_t_veh SET vehstatus = 'S' reason = lv_reason WHERE guid = ls_salesorder->key.
+    ENDLOOP.
+
+  endmethod.
+ENDCLASS.
