@@ -1,0 +1,57 @@
+@AbapCatalog.sqlViewName: 'YZA_CVEH'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Vehicle consumption CDS'
+@VDM.viewType: #CONSUMPTION
+@ObjectModel: {
+    semanticKey: ['VehicleId'],
+    compositionRoot: true,  
+    transactionalProcessingDelegated: true, 
+    createEnabled: true,
+    deleteEnabled: true,
+    updateEnabled: true,                
+    draftEnabled: true   
+    }
+    
+@Metadata.allowExtensions: true
+@OData.publish: true
+
+define view YZA_C_VEH as select from YZA_I_VEH 
+association [0..1] to YZA_I_VEHTYPE_VH as _VehTypeVh
+        on $projection.VehicleType = _VehTypeVh.VehicleType 
+association [0..1] to YZA_C_FULETYPE_VH as _FuleTypeVh 
+        on $projection.FuleType = _FuleTypeVh.FuleType 
+association [0..1] to I_Customer as _OwnerVh
+        on $projection.Owner = _OwnerVh.Customer               
+{
+
+ key guid as Guid,
+ vehid as VehicleId,
+ vehname as VehicleName,
+ vehno as VehicleNo,
+ @ObjectModel.foreignKey.association: '_OwnerVh'
+ owner as Owner,
+ color as Color,
+ cc as CC,
+ @ObjectModel.foreignKey.association: '_FuleTypeVh'
+ fuletype as FuleType,
+ mfyear as ManufYear,
+ mf as Manufacturer, 
+ vehstatus as VehicleStatus,
+ @Consumption.valueHelp: '_VehTypeVh'
+ @ObjectModel.text.association: '_VehTypeVh'   
+ vehtype as VehicleType,
+ @ObjectModel.readOnly: true
+ @ObjectModel.virtualElement: true
+ @ObjectModel.virtualElementCalculatedBy: 'YZA_CL_RATING'
+ cast( 0 as abap.int4 ) as VehRating,
+ crea_date_time,
+ crea_uname,
+ lchg_date_time,
+ lchg_uname,   
+ 
+ _VehTypeVh,
+ _FuleTypeVh,
+ _OwnerVh
+}

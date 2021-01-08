@@ -1,0 +1,26 @@
+@AbapCatalog.sqlViewName: 'YZA_IFULETYPE_VH'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Fule type value help'
+@ObjectModel.representativeKey: 'FuleType'
+@ObjectModel.dataCategory: #TEXT
+@Search.searchable: true
+
+define view YZA_I_FULETYPE_VH as select from dd07v as TextProvider{    
+    @EndUserText.label: 'Fule Type'
+    @EndUserText.quickInfo: 'Fule Type'
+    key cast( left ( TextProvider.domvalue_l , 1 ) as domvalue_l ) as FuleType,  
+    @Search.defaultSearchElement : false 
+    @Semantics.language: true 
+    key TextProvider.ddlanguage as Language,    
+    @Semantics.text: true -- identifies the text field
+    @Search.defaultSearchElement: true
+    @Search.fuzzinessThreshold: 0.8    
+    @EndUserText.label: 'Fule Type Text'
+    @EndUserText.quickInfo: 'Fule Type Text'
+    TextProvider.ddtext as FuleTypeText
+}
+where domname = 'YZA_FULETYPE'
+and   ddlanguage = $session.system_language
+    

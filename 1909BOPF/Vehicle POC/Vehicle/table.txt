@@ -1,0 +1,22 @@
+@EndUserText.label : 'Vehicle Table'
+@AbapCatalog.enhancementCategory : #EXTENSIBLE_CHARACTER_NUMERIC
+@AbapCatalog.tableCategory : #TRANSPARENT
+@AbapCatalog.deliveryClass : #A
+@AbapCatalog.dataMaintenance : #LIMITED
+define table yza_t_veh {
+  key mandt : mandt not null;
+  key guid  : snwd_node_key not null;
+  vehid     : char10;
+  vehname   : char20;
+  vehno     : char10;
+  owner     : kunnr;
+  color     : /scf/color;
+  cc        : int4;
+  fuletype  : yza_fuletype;
+  mfyear    : gjahr;
+  mf        : char10;
+  vehstatus : char1;
+  vehtype   : char2;
+  include /bobf/s_lib_admin_data;
+
+}

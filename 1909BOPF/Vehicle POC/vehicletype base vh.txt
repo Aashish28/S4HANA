@@ -1,0 +1,16 @@
+@AbapCatalog.sqlViewName: 'YZA_IVEHTYPE_VH'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Vehicle type value help'
+@ObjectModel.dataCategory: #VALUE_HELP
+@VDM.viewType: #BASIC
+@Search.searchable: true
+define view YZA_I_VEHTYPE_VH as select from yza_t_vehtype {
+
+    key vtype as VehicleType,
+        @Search.defaultSearchElement: true
+        @Search.fuzzinessThreshold: 0.8
+        @Semantics.text: true
+         vtypedesc as VehicleTypeText
+} where readytouse = 'X'

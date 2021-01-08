@@ -1,0 +1,13 @@
+@EndUserText.label : 'Vehicle Type'
+@AbapCatalog.enhancementCategory : #EXTENSIBLE_CHARACTER_NUMERIC
+@AbapCatalog.tableCategory : #TRANSPARENT
+@AbapCatalog.deliveryClass : #A
+@AbapCatalog.dataMaintenance : #LIMITED
+define table yza_t_vehtype {
+  key mandt  : mandt not null;
+  key vtype  : char2 not null;
+  vtypedesc  : char30;
+  readytouse : char1;
+  include /bobf/s_lib_admin_data;
+
+}

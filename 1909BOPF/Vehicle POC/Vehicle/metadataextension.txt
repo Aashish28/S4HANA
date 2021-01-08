@@ -1,0 +1,142 @@
+@Metadata.layer: #CUSTOMER
+
+@UI: {
+    headerInfo: {
+    typeImageUrl: 'sap-icon://car-rental',
+    typeName: 'Vehicle',
+    typeNamePlural: 'Vehicles',
+    title: { type: #STANDARD, label: 'Vehicle Maintenance', value: 'VehicleId'},
+    description: {  label: 'Vehicle Name', value: 'VehicleName' }
+    }
+}
+
+annotate view YZA_C_VEH
+    with 
+{
+
+@UI.facet: [
+        { 
+            label: 'Header data',
+            id: 'Header',
+            type: #COLLECTION
+        },
+        {
+            label: 'Vehicle Information',
+            id : 'VehicleData',
+            parentId : 'Header',
+            type : #FIELDGROUP_REFERENCE,
+            targetQualifier : 'VehicleData'
+        },
+        {
+            label: 'Manufacturing Information',
+            id : 'ManfData',
+            parentId : 'Header',
+            type : #FIELDGROUP_REFERENCE,
+            targetQualifier : 'ManfData'
+        },        
+        {
+            label: 'Owner Information',
+            id : 'OwnerInfo',
+            parentId : 'Header',
+            type : #FIELDGROUP_REFERENCE,
+            targetQualifier : 'OwnerInfo'
+        }
+    ]
+
+    @UI.hidden: true
+    Guid;
+    @UI: {
+        lineItem: [{position : 10 , label: 'Vehicle Id', importance: #HIGH }]
+    } 
+    VehicleId;
+    @EndUserText.label: 'Vehicle Name' 
+     @UI: {
+        lineItem: [ { position: 20, label: 'Vehicle Name', importance: #HIGH }],
+        identification:[ { position: 10, label: 'Vehicle Name' } ],
+        fieldGroup:[{ qualifier: 'VehicleData', position: 10}]
+    }
+    VehicleName;
+     @EndUserText.label: 'Vehicle Type'   
+     @UI: {
+        lineItem: [ { position: 30, label: 'Vehicle Type', importance: #HIGH }],
+        selectionField: [ { position: 10 } ],
+        identification:[ { position: 20, label: 'Vehicle Type' } ],
+        fieldGroup:[{ qualifier: 'VehicleData', position: 20}]
+    }
+    VehicleType;
+     @EndUserText.label: 'Fule Type'   
+     @UI: {
+        lineItem: [ { position: 40, label: 'Fule Type', importance: #HIGH }],
+        selectionField: [ { position: 20 } ],
+        identification:[ { position: 40, label: 'Fule Type' } ],
+        fieldGroup:[{ qualifier: 'VehicleData', position: 40}]
+    }
+    FuleType;
+     @UI: {
+        identification:[ { position: 50, label: 'Color' } ],
+        fieldGroup:[{ qualifier: 'VehicleData', position: 50}]
+    }
+    Color;
+    @EndUserText.label: 'CC'   
+     @UI: {
+        identification:[ { position: 60, label: 'CC' } ],
+        fieldGroup:[{ qualifier: 'VehicleData', position: 60}]
+    }
+    CC;
+    
+    
+     @EndUserText.label: 'Year'   
+     @UI: {
+        lineItem: [ { position: 50, label: 'Mf.Year', importance: #HIGH }],
+        selectionField: [ { position: 30 } ],
+        identification:[ { position: 70, label: 'Mf.Year' } ],
+        fieldGroup:[{ qualifier: 'ManfData', position: 70}]
+    }       
+    ManufYear;
+     @UI: {
+        identification:[ { position: 80, label: 'Manufacturer' } ],
+        fieldGroup:[{ qualifier: 'ManfData', position: 80}]
+    }
+    @EndUserText.label: 'Manufacturer'  
+    Manufacturer;
+
+
+     @UI: {
+        identification:[ { position: 90, label: 'Owner' } ],
+        fieldGroup:[{ qualifier: 'OwnerInfo', position: 90}]
+    } 
+    Owner;
+    @EndUserText.label: 'Vehicle No'   
+     @UI: {
+        identification:[ { position: 100, label: 'Vehicle No' } ],
+        fieldGroup:[{ qualifier: 'OwnerInfo', position: 100}]
+    }
+    VehicleNo;
+    @EndUserText.label: 'Status'   
+     @UI: {
+        lineItem: [ { position: 70, label: 'Status', importance: #HIGH }],
+        identification:[ { position: 110, label: 'Status' } ],
+        fieldGroup:[{ qualifier: 'OwnerInfo', position: 110}]
+    }
+    VehicleStatus;
+    @EndUserText.label: 'Rating'   
+     @UI: {
+        lineItem: [ { position: 60, label: 'Rating', importance: #HIGH,  type : #AS_DATAPOINT}]
+    }
+    @UI.dataPoint : { visualization: #RATING }
+    VehRating;
+    
+    @UI.hidden: true
+    crea_date_time;
+    @UI.hidden: true
+    crea_uname;
+    @UI.hidden: true
+    lchg_date_time;
+    @UI.hidden: true
+    lchg_uname;
+    
+    /* Associations */
+    @UI.hidden: true
+    _VehTypeVh;
+    
+}

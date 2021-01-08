@@ -1,0 +1,25 @@
+@AbapCatalog.sqlViewName: 'YZA_CFULETYPE_VH'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Fule type value help'
+
+@ObjectModel.resultSet.sizeCategory: #XS
+@ObjectModel.dataCategory: #VALUE_HELP
+@Search.searchable: true
+
+define view YZA_C_FULETYPE_VH as select from dd07v as ValueProvider
+association [0..*] to YZA_I_FULETYPE_VH as _Text
+        on $projection.FuleType = _Text.FuleType
+{
+    @EndUserText.label: 'Fule Type'
+    @EndUserText.quickInfo: 'Fule Type'
+    @ObjectModel.text.association: '_Text'
+    @Search.defaultSearchElement: true
+    key cast( left ( ValueProvider.domvalue_l , 1 ) as domvalue_l ) as FuleType, 
+    
+    _Text 
+}    
+where domname = 'YZA_FULETYPE'
+and   ddlanguage = $session.system_language
+    
