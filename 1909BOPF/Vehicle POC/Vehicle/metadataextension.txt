@@ -14,7 +14,7 @@ annotate view YZA_C_VEH
     with 
 {
 
-@UI.facet: [
+@UI.facet: [        
         { 
             label: 'Header data',
             id: 'Header',
@@ -58,13 +58,15 @@ annotate view YZA_C_VEH
         fieldGroup:[{ qualifier: 'VehicleData', position: 10}]
     }
     VehicleName;
+     @Consumption.semanticObject: 'VehicleType'
      @EndUserText.label: 'Vehicle Type'   
      @UI: {
-        lineItem: [ { position: 30, label: 'Vehicle Type', importance: #HIGH }],
+        lineItem: [ { position: 30, label: 'Vehicle Type', importance: #HIGH , type: #WITH_INTENT_BASED_NAVIGATION,
+        semanticObjectAction: 'display'}],
         selectionField: [ { position: 10 } ],
         identification:[ { position: 20, label: 'Vehicle Type' } ],
         fieldGroup:[{ qualifier: 'VehicleData', position: 20}]
-    }
+    }    
     VehicleType;
      @EndUserText.label: 'Fule Type'   
      @UI: {
@@ -73,6 +75,7 @@ annotate view YZA_C_VEH
         identification:[ { position: 40, label: 'Fule Type' } ],
         fieldGroup:[{ qualifier: 'VehicleData', position: 40}]
     }
+    @UI.textArrangement: #TEXT_LAST
     FuleType;
      @UI: {
         identification:[ { position: 50, label: 'Color' } ],
@@ -94,6 +97,7 @@ annotate view YZA_C_VEH
         identification:[ { position: 70, label: 'Mf.Year' } ],
         fieldGroup:[{ qualifier: 'ManfData', position: 70}]
     }       
+    @Consumption.filter.selectionType:#SINGLE
     ManufYear;
      @UI: {
         identification:[ { position: 80, label: 'Manufacturer' } ],
@@ -127,7 +131,8 @@ annotate view YZA_C_VEH
     }
     @UI.dataPoint : { visualization: #RATING }
     VehRating;
-    
+    @UI.multiLineText: true
+    reason;
     @UI.hidden: true
     crea_date_time;
     @UI.hidden: true

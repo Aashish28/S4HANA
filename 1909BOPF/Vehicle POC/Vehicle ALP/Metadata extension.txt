@@ -151,7 +151,8 @@ annotate view YZA_C_AQ_VEH
     } 
     ManufYear;
 
-    @UI.dataPoint.title: 'Total Vehicle'  
+    @UI.dataPoint.title: 'Total Vehicle'
+    @UI.dataPoint.criticalityValue: #NEGATIVE
     @UI: {
         lineItem: [{position : 20 , label: 'Total Vehicle' }]
     }    

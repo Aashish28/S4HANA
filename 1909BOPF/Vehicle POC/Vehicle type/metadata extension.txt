@@ -2,6 +2,7 @@
 
 @UI: {
     headerInfo: {
+    
     typeImageUrl: 'sap-icon://insurance-car',
     typeName: 'Vehicle Type',
     typeNamePlural: 'Vehicle Types',
@@ -10,6 +11,9 @@
     }
 }
 
+@UI.selectionVariant: [{ qualifier: 'Approved', text: 'Approved' , filter:'ReadyToUse EQ "YES"'},
+                       { qualifier: 'NotApproved', text: 'Not Approved' , filter:'ReadyToUse EQ "NO"'}
+                      ]
         
 annotate view YZA_C_VEHTYPE
     with 
@@ -45,14 +49,14 @@ annotate view YZA_C_VEHTYPE
     VehicleType;
      @EndUserText.label: 'Vehicle Type Text'   
      @UI: {
-          lineItem: [ { position: 30, label: 'Vehicle Type Text', importance: #HIGH }],
+          lineItem: [ { position: 20, label: 'Vehicle Type Text', importance: #HIGH }],
           selectionField: [ { position: 10 } ],
           identification:[ { position: 20, label: 'Vehicle Type Text' }],
            fieldGroup:[{ qualifier: 'TypeInfo', position: 20,  importance: #HIGH}]
         }
     VehicleTypeText;
     @UI: {
-      lineItem: [ { position: 20, label: 'Ready To Use', importance: #HIGH } ]
+      lineItem: [ { position: 30, label: 'Ready To Use', importance: #HIGH } ]
     }
     ReadyToUse;
     @UI.hidden: true 
