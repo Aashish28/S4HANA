@@ -1,0 +1,136 @@
+<edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Version="4.0">
+    <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/Common.xml">
+        <edmx:Include Namespace="com.sap.vocabularies.Common.v1" Alias="Common"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/UI.xml">
+        <edmx:Include Namespace="com.sap.vocabularies.UI.v1" Alias="UI"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/v2/northwind/northwind.svc/$metadata">
+        <edmx:Include Namespace="NorthwindModel"/>
+        <edmx:Include Namespace="ODataWeb.Northwind.Model"/>
+    </edmx:Reference>
+    <edmx:DataServices>
+        <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="com.my">
+            <Annotations Target="NorthwindModel.Order">
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="OrderID"/>
+                            <Annotation Term="UI.Importance" EnumMember="UI.ImportanceType/High"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="OrderDate"/>
+                            <Annotation Term="UI.Importance" EnumMember="UI.ImportanceType/High"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="CustomerID"/>
+                            <Annotation Term="UI.Importance" EnumMember="UI.ImportanceType/High"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="RequiredDate"/>
+                            <Annotation Term="UI.Importance" EnumMember="UI.ImportanceType/High"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+                <Annotation Term="UI.SelectionFields">
+                <Collection>
+                    <PropertyPath>CustomerID</PropertyPath>
+                </Collection>
+                </Annotation>
+                <Annotation Term="UI.HeaderInfo">
+                <Record Type="UI.HeaderInfoType">
+                    <PropertyValue Property="TypeName" String="Order"/>
+                    <PropertyValue Property="TypeNamePlural" String="Orders"/>
+                    <PropertyValue Property="Title">
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="OrderID"/>
+                        </Record>
+                    </PropertyValue>
+                </Record>
+                </Annotation>
+                <Annotation Term="UI.FieldGroup" Qualifier="OrderFG">
+                    <Record Type="UI.FieldGroupType">
+                        <PropertyValue Property="Data">
+                            <Collection>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="Freight"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Value" Path="OrderDate"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+                <Annotation Term="UI.Facets">
+                    <Collection>
+                        <Record Type="UI.CollectionFacet">
+                            <PropertyValue Property="Label" String="Order Details" />
+                            <PropertyValue Property="Facets">
+                                <Collection>
+                                <Record Type="UI.ReferenceFacet">
+                                    <PropertyValue Property="Label" String="Order Info"/>
+                                    <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#OrderFG"/>
+                                </Record>
+                                </Collection>
+                            </PropertyValue>
+                        </Record>
+                        <Record Type="UI.ReferenceFacet">
+                            <PropertyValue Property="Target" AnnotationPath="Order_Details/@UI.LineItem" />
+                            <PropertyValue Property="Label" String="Order Items" />
+                        </Record>
+                    </Collection>
+                </Annotation>
+                
+            </Annotations>
+            <Annotations Target="NorthwindModel.Customer/CustomerID">
+                <Annotation Term="Common.Label" String="Customer Id"/>
+            </Annotations>
+            <Annotations Target="NorthwindModel.Customer/ContactName">
+                <Annotation Term="Common.Label" String="{@i18n>customerName}"/>
+            </Annotations>
+            <Annotations Target="NorthwindModel.Order/CustomerID">
+                <Annotation Term ="Common.ValueList">
+                 <Record Type="Common.ValueListType">
+                     <PropertyValue Property="CollectionPath" String="Customers"/>
+                     <PropertyValue Property="Label" String="Customer Search"/>
+                     <PropertyValue Property="SearchSupported" Bool="true"/>
+                     <PropertyValue Property="Parameters">
+                         <Collection>
+                             <Record Type="Common.ValueListParameterDisplayOnly">
+                                 <PropertyValue Property="ValueListProperty" String="ContactName"/>
+                             </Record>
+                             <Record Type="Common.ValueListParameterInOut">
+                                 <PropertyValue Property="LocalDataProperty" PropertyPath="CustomerID"/>
+                                 <PropertyValue Property="ValueListProperty" String="CustomerID"/>
+                             </Record>
+                         </Collection>
+                     </PropertyValue>
+                 </Record>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="NorthwindModel.Order_Detail">
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="ProductID"/>
+                            <Annotation Term="UI.Importance" EnumMember="UI.ImportanceType/High"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="Quantity"/>
+                            <Annotation Term="UI.Importance" EnumMember="UI.ImportanceType/High"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="UnitPrice"/>
+                            <Annotation Term="UI.Importance" EnumMember="UI.ImportanceType/High"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="Discount"/>
+                            <Annotation Term="UI.Importance" EnumMember="UI.ImportanceType/High"/>
+                        </Record>
+                    </Collection>
+                </Annotation>              
+            </Annotations>
+        </Schema>
+    </edmx:DataServices>
+</edmx:Edmx>

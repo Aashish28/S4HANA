@@ -1,0 +1,14 @@
+@EndUserText.label: 'Manufacturer value help'
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@Search.searchable: true
+define view entity ZI_MANF_VH as select from ZI_MANF_UM {
+  @Search.defaultSearchElement: true
+  @ObjectModel.text.element: ['Mfname']
+  key MfID,
+  @Search.defaultSearchElement: true
+  @Search.fuzzinessThreshold: 0.90 
+  @Semantics.text: true
+  @EndUserText.label: 'Manufacturer Name'
+  Mfname,
+  Country  
+}

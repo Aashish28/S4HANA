@@ -1,0 +1,76 @@
+@Metadata.layer: #CUSTOMER
+@UI: {
+  headerInfo: {
+    typeName: 'User', 
+    typeNamePlural: 'Users', 
+    title: {
+      type: #STANDARD, 
+      label: 'User', 
+      value: 'UidInternal'
+    }
+  }, 
+  presentationVariant: [ {
+    sortOrder: [ {
+      by: 'UidInternal', 
+      direction: #DESC
+    } ], 
+    visualizations: [ {
+      type: #AS_LINEITEM
+    } ]
+  } ]
+}
+annotate view ZC_User_M with
+{
+  @UI.facet: [ {
+    id: 'idCollection', 
+    type: #COLLECTION, 
+    label: 'User', 
+    position: 10 
+  }, 
+  {
+    id: 'idIdentification', 
+    parentId: 'idCollection', 
+    type: #IDENTIFICATION_REFERENCE, 
+    label: 'General Information', 
+    position: 10 
+  } ]
+  @UI.hidden: true
+  UidUUID;
+  
+  @UI.lineItem: [ {
+    position: 20 , 
+    importance: #HIGH, 
+    label: 'UidInternal'
+  } ]
+  @UI.identification: [ {
+    position: 20 , 
+    label: 'UidInternal'
+  } ]
+  UidInternal;
+  
+  @UI.lineItem: [ {
+    position: 30 , 
+    importance: #HIGH, 
+    label: 'Uname'
+  } ]
+  @UI.identification: [ {
+    position: 30 , 
+    label: 'Uname'
+  } ]
+  Uname;
+  
+  @UI.hidden: true
+  LocalCreatedBy;
+  
+  @UI.hidden: true
+  LocalCreatedAt;
+  
+  @UI.hidden: true
+  LocalLastChangedBy;
+  
+  @UI.hidden: true
+  LocalLastChangedAt;
+  
+  @UI.hidden: true
+  LastChangedAt;
+}

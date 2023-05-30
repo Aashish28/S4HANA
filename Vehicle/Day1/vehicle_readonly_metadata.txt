@@ -1,0 +1,161 @@
+@Metadata.layer: #CUSTOMER
+@UI: {
+  headerInfo: {
+    typeName: 'Vehicle',
+    typeNamePlural: 'Vehicles',
+    title: {
+      type: #STANDARD,
+      label: 'Vehicle',
+      value: 'VehInternal'
+    }
+  },
+  presentationVariant: [ {
+    sortOrder: [ {
+      by: 'VehInternal',
+      direction: #DESC
+    } ],
+    visualizations: [ {
+      type: #AS_LINEITEM
+    } ]
+  } ]
+}
+
+annotate entity YC_VEHME_ANNO with
+{
+  @UI.facet: [
+      { id : 'idHeader' ,
+        type: #DATAPOINT_REFERENCE ,
+        label: 'Header' ,
+        purpose: #HEADER ,
+        targetQualifier: 'VehRating'},
+      {
+          label: 'Vehicle data',
+          id: 'Header',
+          type: #COLLECTION
+      },
+      {
+          label: 'Vehicle Information',
+          id : 'VehicleData',
+          parentId : 'Header',
+          type : #FIELDGROUP_REFERENCE,
+          targetQualifier : 'VehicleData'
+      },
+      {
+          label: 'Manufacturing Information',
+          id : 'ManufacturerData',
+          parentId : 'Header',
+          type : #FIELDGROUP_REFERENCE,
+          targetQualifier : 'ManufacturerData'
+      },
+      {
+          label: 'Owner Information',
+          id : 'OwnerData',
+          parentId : 'Header',
+          type : #FIELDGROUP_REFERENCE,
+          targetQualifier : 'OwnerData'
+      },
+      {
+          label: 'Status Information',
+          id : 'StatusData',
+          parentId : 'Header',
+          type : #FIELDGROUP_REFERENCE,
+          targetQualifier : 'StatusData'
+      }
+
+  ]
+
+  @UI.hidden: true
+  VehUUID;
+
+  //Vehicle Data
+  @UI: {
+    lineItem: [{ position: 10,importance: #HIGH, label: 'Id'},
+                { type: #FOR_ACTION, dataAction: 'setStatus', label: 'Set Status' }],
+     fieldGroup:[{ qualifier: 'VehicleData', position: 10,label: 'Id'}]
+    }
+  VehInternal;
+  @UI: {
+    lineItem: [{ position: 20,importance: #HIGH, label: 'Vehicle Name'}],
+    fieldGroup:[{ qualifier: 'VehicleData', position: 20,label: 'Vehicle Name'}]
+    }
+  Vehname;
+  @UI: {
+        lineItem: [ { position: 30, label: 'Vehicle Type', importance: #HIGH , type: #WITH_INTENT_BASED_NAVIGATION,
+        semanticObjectAction: 'display'}],
+        selectionField: [ { position: 10 } ],
+        fieldGroup:[{ qualifier: 'VehicleData', position: 30}]
+    }
+  Vehtype;
+  @UI: {
+     lineItem: [ { position: 40, label: 'Fule Type', importance: #HIGH }],
+     selectionField: [ { position: 20 } ],
+     fieldGroup:[{ qualifier: 'VehicleData', position: 40}]
+  }
+  @UI.textArrangement: #TEXT_LAST
+  Fueltype;
+  @UI: {
+        identification:[ { position: 50, label: 'Color', importance: #MEDIUM} ],
+        fieldGroup:[{ qualifier: 'VehicleData', position: 50,label: 'Color'}]
+  }
+  Color;
+  @UI: {
+        identification:[ { position: 60, label: 'CC', importance: #LOW } ],
+        fieldGroup:[{ qualifier: 'VehicleData', position: 60,label: 'CC'}]
+    }
+  Cc;
+  @UI.fieldGroup:[{ qualifier: 'VehicleData', position: 70, importance: #LOW }]
+  Totalprice;
+
+
+  //Manufacturer Data
+
+  @UI: {
+       selectionField: [ { position: 30 }],
+       fieldGroup:[{ qualifier: 'ManufacturerData', position: 10}]
+   }
+  Mf;
+  @UI: {
+       selectionField: [ { position: 40 }],
+       fieldGroup:[{ qualifier: 'ManufacturerData', position: 20,label: 'Mf.Year'}]
+   }
+  @Consumption.filter.selectionType:#SINGLE
+  Mfyear;
+
+  @UI.fieldGroup:[{ qualifier: 'ManufacturerData', position: 30, importance: #LOW}]
+  Country;
+
+  //Owner Data
+
+  @UI: {
+       fieldGroup:[{ qualifier: 'OwnerData', position: 10,label: 'Owner'}]
+  }
+  Owner;
+  @UI: {
+       fieldGroup:[{ qualifier: 'OwnerData', position: 20,label: 'Owner'}]
+  }
+  Purchasedate;
+
+  //Status Data
+
+  @UI: {
+       fieldGroup:[{ qualifier: 'StatusData', position: 10}]
+  }
+  @UI.textArrangement: #TEXT_ONLY
+  Overallstatus;
+  @UI: {
+       fieldGroup:[{ qualifier: 'StatusData', position: 20,label: 'Status Change Date'}]
+  }
+  Statusdate;
+
+  @UI: {
+       fieldGroup:[{ qualifier: 'StatusData', position: 30,label: 'Status Change Date'}]
+  }
+  @UI.multiLineText: true
+  Reason;
+  @EndUserText.label: 'Safety Rating'
+  @UI: {
+       lineItem: [ { position: 50, label: 'Rating', importance: #HIGH,  type : #AS_DATAPOINT}]
+ }
+  @UI.dataPoint : { visualization: #RATING , title:'Safety Rating'}
+  VehRating;
+}

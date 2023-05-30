@@ -1,0 +1,19 @@
+@EndUserText.label : 'Vehicle Type'
+@AbapCatalog.enhancement.category : #EXTENSIBLE_CHARACTER_NUMERIC
+@AbapCatalog.tableCategory : #TRANSPARENT
+@AbapCatalog.deliveryClass : #A
+@AbapCatalog.dataMaintenance : #RESTRICTED
+define table zaa_t_vehtype {
+  key client            : abap.clnt not null;
+  key vt_uuid           : sysuuid_x16 not null;
+  vt_internal           : zaa_de_vehtype not null;
+  @EndUserText.label : 'Vehicle Type Name'
+  vtfname               : abap.char(60);
+  @EndUserText.label : 'Total Count'
+  totalcount            : abap.int4;
+  local_created_by      : abp_creation_user;
+  local_created_at      : abp_creation_tstmpl;
+  local_last_changed_by : abp_locinst_lastchange_user;
+  local_last_changed_at : abp_locinst_lastchange_tstmpl;
+  last_changed_at       : abp_lastchange_tstmpl;
+}

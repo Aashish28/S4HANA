@@ -1,0 +1,164 @@
+CLASS lsc_zi_vehicle_md DEFINITION INHERITING FROM cl_abap_behavior_saver.
+
+  PROTECTED SECTION.
+
+    METHODS save_modified REDEFINITION.
+
+ENDCLASS.
+
+CLASS lsc_zi_vehicle_md IMPLEMENTATION.
+
+  METHOD save_modified.
+    data vehicles type STANDARD TABLE OF zaa_t_veh.
+    if CREATE-vehicle is NOT INITIAL.
+       loop at CREATE-vehicle into data(vehicle).
+        data(lv_vehtype) = vehicle-Vehtype.
+
+        SELECT SINGLE totalcount FROM zaa_t_vehtype WHERE vt_internal = @lv_vehtype INTO @DATA(ls_vehtypecount).
+
+        ls_vehtypecount = ls_vehtypecount  + 1.
+        update zaa_t_vehtype set totalcount = @ls_vehtypecount WHERE vt_internal = @lv_vehtype.
+
+       ENDLOOP.
+
+    endif.
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+CLASS LHC_VEHICLE DEFINITION INHERITING FROM CL_ABAP_BEHAVIOR_HANDLER.
+  PRIVATE SECTION.
+    METHODS:
+      CALCULATEVEHINTERNAL FOR DETERMINE ON SAVE
+        IMPORTING
+          KEYS FOR  Vehicle~CalculateVehInternal ,
+      get_instance_features FOR INSTANCE FEATURES
+            IMPORTING keys REQUEST requested_features FOR Vehicle RESULT result.
+
+          METHODS setStatus FOR MODIFY
+            IMPORTING keys FOR ACTION Vehicle~setStatus RESULT result.
+          METHODS copyVehicle FOR MODIFY
+            IMPORTING keys FOR ACTION Vehicle~copyVehicle.
+
+          METHODS allMandatoryFields FOR VALIDATE ON SAVE
+            IMPORTING keys FOR Vehicle~allMandatoryFields.
+ENDCLASS.
+
+CLASS LHC_VEHICLE IMPLEMENTATION.
+  METHOD CALCULATEVEHINTERNAL.
+
+      "Ensure idempotence
+    READ ENTITIES OF zi_vehicle_md IN LOCAL MODE
+      ENTITY Vehicle
+        FIELDS ( VehInternal )
+        WITH CORRESPONDING #( keys )
+      RESULT DATA(Vehicles).
+
+    DELETE Vehicles WHERE VehInternal IS NOT INITIAL.
+    CHECK Vehicles IS NOT INITIAL.
+
+    "Get max VehicleId
+    SELECT SINGLE FROM zaa_t_veh FIELDS MAX( veh_internal ) INTO @DATA(max_vid).
+
+    "update involved instances
+    MODIFY ENTITIES OF zi_vehicle_md IN LOCAL MODE
+      ENTITY Vehicle
+        UPDATE FIELDS ( VehInternal )
+        WITH VALUE #( FOR Vehicle IN Vehicles INDEX INTO i (
+                           %tky      = Vehicle-%tky
+                           VehInternal  = max_vid + i ) ).
+
+  ENDMETHOD.
+  METHOD get_instance_features.
+  ENDMETHOD.
+
+  METHOD setStatus.
+  ENDMETHOD.
+
+  METHOD copyVehicle.
+
+      DATA : vehicle TYPE TABLE FOR CREATE zi_vehicle_md\\Vehicle.
+
+    READ ENTITIES OF zi_vehicle_md IN LOCAL MODE
+         ENTITY Vehicle
+         ALL FIELDS WITH CORRESPONDING #( keys )
+         RESULT DATA(lt_vehicle) FAILED failed.
+
+    LOOP AT lt_vehicle ASSIGNING FIELD-SYMBOL(<fs_vehicle>).
+
+        APPEND VALUE #( %cid = keys[ 1 ]-%cid
+                        %is_draft = '01'
+                        %data = CORRESPONDING #( <fs_vehicle> EXCEPT VehInternal ) )
+                        TO vehicle ASSIGNING FIELD-SYMBOL(<fs_new_vehicle>).
+
+                        ENDLOOP.
+        <fs_new_vehicle>-Vehname = |Copy of { <fs_vehicle>-VehInternal }|.
+
+
+    MODIFY ENTITIES of zi_vehicle_md IN LOCAL MODE
+        ENTITY Vehicle
+        CREATE FIELDS ( Vehname Vehtype Fueltype Color Cc Totalprice Currencycode Country Mfyear Mf
+          )
+        WITH vehicle
+        MAPPED DATA(mapped_create)
+        FAILED DATA(failed_create)
+        REPORTED DATA(reported_create).
+
+   READ ENTITIES OF zi_vehicle_md IN LOCAL MODE
+        ENTITY Vehicle
+        ALL FIELDS WITH CORRESPONDING #( mapped_create-vehicle )
+        RESULT DATA(read_created_result).
+
+    mapped-Vehicle = mapped_create-vehicle.
+
+  ENDMETHOD.
+
+  METHOD allMandatoryFields.
+     READ ENTITIES OF zi_vehicle_md IN LOCAL MODE
+    ENTITY Vehicle
+     ALL FIELDS
+     WITH CORRESPONDING #(  keys )
+    RESULT DATA(lt_vehicle)
+    failed data(lt_vehicle_failed)
+    reported data(lt_vehicle_reported).
+
+    LOOP AT lt_vehicle INTO DATA(ls_vehicle).
+        "Clear state area for instance
+        APPEND VALUE #( %tky       = ls_vehicle-%tky
+                %state_area = if_abap_behv=>state_area_all ) TO REPORTED-vehicle.
+
+       if ls_vehicle-Vehname is initial.
+          APPEND value #( %tky = ls_vehicle-%tky
+           ) to failed-vehicle.
+          APPEND value #( %tky = ls_vehicle-%tky
+                        %state_area  = 'VALIDATE_VEHICLENAME'
+                          %msg = new_message_with_text( text = 'Vehicle Name is mandatory'
+                          severity  = if_abap_behv_message=>severity-error )
+                          %element-Vehname = if_abap_behv=>mk-on
+                        ) to reported-vehicle.
+        endif.
+
+       if ls_vehicle-Vehtype is initial.
+          APPEND value #( %tky = ls_vehicle-%tky ) to failed-vehicle.
+          APPEND value #( %tky = ls_vehicle-%tky
+                          %msg = new_message_with_text( text = 'Vehicle type is mandatory'
+                          severity  = if_abap_behv_message=>severity-error )
+                          %element-Vehtype = if_abap_behv=>mk-on
+                        ) to reported-vehicle.
+        endif.
+
+       if ls_vehicle-Fueltype is initial.
+          APPEND value #( %tky = ls_vehicle-%tky ) to failed-vehicle.
+          APPEND value #( %tky = ls_vehicle-%tky
+                          %msg = new_message_with_text( text = 'Fule type is mandatory'
+                          severity  = if_abap_behv_message=>severity-error )
+                          %element-Fueltype = if_abap_behv=>mk-on
+                        ) to reported-vehicle.
+        endif.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+
+ENDCLASS.

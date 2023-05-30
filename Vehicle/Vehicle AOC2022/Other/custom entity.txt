@@ -1,0 +1,11 @@
+@EndUserText.label: 'Vehicle custom CDS entity'
+@ObjectModel.query.implementedBy: 'ABAP:ZCL_CCE_VEH'
+define custom entity ZI_CCE_VEH 
+ {
+  @EndUserText.label : 'Vehicle Id'
+ key veh_internal          : abap.int4;
+  @EndUserText.label : 'Vehicle Name'
+  vehname               : abap.char(60);
+  vehtype               : zaa_de_vehtype;
+  fueltype              : zaa_de_fueltype; 
+}

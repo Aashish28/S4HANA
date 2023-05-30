@@ -1,0 +1,36 @@
+@AbapCatalog.sqlViewName: 'YZIV_PRODCUBE'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Product cube'
+@VDM.viewType: #COMPOSITE
+@Analytics.dataCategory: #CUBE
+
+define view YZI_PRODUCT_CUBE as select from snwd_pd
+  association [0..1] to SEPMRA_I_ProductText        as _ProductTextInOriginalLang on  $projection.Product          = _ProductTextInOriginalLang.Product
+                                                                                  and _ProductTextInOriginalLang.Language = $session.system_language
+  association [0..1] to SEPMRA_I_WeightUnit         as _WeightUnit                on  $projection.WeightUnit = _WeightUnit.UnitOfMeasure
+  association [0..1] to I_Currency                  as _Currency                  on  $projection.Currency = _Currency.Currency
+  association [0..1] to SEPMRA_I_ProductCategory    as _ProductCategory           on  $projection.ProductCategory = _ProductCategory.ProductCategory
+{
+    cast( product_id as sepmra_product preserving type )      as Product,
+      @ObjectModel: {
+        foreignKey.association: '_ProductCategory'
+      }
+    category as ProductCategory,
+      @ObjectModel: {
+        foreignKey.association: '_Currency'
+      }
+      cast( currency_code as sepmra_currency preserving type )                      as Currency,
+      @ObjectModel: {
+        foreignKey.association: '_WeightUnit'
+      }
+      cast( weight_unit as sepmra_weightunit preserving type )                      as WeightUnit,
+       @EndUserText.label: 'Total Product'
+       @DefaultAggregation: #SUM
+        1 as TotalProduct,
+       _ProductTextInOriginalLang,
+       _ProductCategory,
+       _Currency,
+       _WeightUnit
+}

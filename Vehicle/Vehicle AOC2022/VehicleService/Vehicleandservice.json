@@ -1,0 +1,110 @@
+{
+    "$schema": "https://raw.githubusercontent.com/SAP-samples/cloud-abap-rap/main/json_schemas/RAPGenerator-schema-all.json",
+    "namespace": "Y",
+    "bindingType": "odata_v4_ui",
+    "dataSourceType": "table",
+    "implementationtype": "managed_uuid",
+    "package": "YABAP22",
+    "draftenabled": true,
+    "prefix": "",
+    "suffix": "_MDC",
+    "hierarchy": {
+        "entityName": "Vehicle",
+        "dataSource": "zaa_t_veh",
+        "objectId": "veh_internal",
+        "uuid": "veh_uuid",
+        "etagMaster": "last_changed_at",
+        "lastChangedAt": "local_last_changed_at",
+        "lastChangedBy": "local_last_changed_by",
+        "localInstanceLastChangedAt": "last_changed_at",
+        "createdAt": "local_created_at",
+        "createdBy": "local_created_by",
+        "associations": [
+            {
+              "name": "_Country",
+              "target": "I_Country",
+              "cardinality": "one_to_one",
+              "conditions": [
+                {
+                  "projectionField": "Country",
+                  "associationField": "Country"
+                }
+              ]
+            },
+            {
+                "name": "_OverallStatus",
+                "target": "/DMO/I_Overall_Status_VH",
+                "cardinality": "one_to_one",
+                "conditions": [
+                  {
+                    "projectionField": "Overallstatus",
+                    "associationField": "OverallStatus"
+                  }
+                ]
+            },
+            {
+                "name": "_Currency",
+                "target": "I_Currency",
+                "cardinality": "one_to_one",
+                "conditions": [
+                  {
+                    "projectionField": "Currencycode",
+                    "associationField": "Currency"
+                  }
+                ]
+              },
+              {
+                "name": "_Vehtyp",
+                "target": "ZI_VEHTYP_VH",
+                "cardinality": "one_to_one",
+                "conditions": [
+                  {
+                    "projectionField": "Vehtype",
+                    "associationField": "VtInternal"
+                  }
+                ]
+              }
+            ],
+          "valueHelps": [
+            {
+                "alias": "Country",
+                "name": "I_Country",
+                "localElement": "Country",
+                "element": "Country"
+            },
+            {
+                "alias": "OverallStatus",
+                "name": "/DMO/I_Overall_Status_VH",
+                "localElement": "Overallstatus",
+                "element": "OverallStatus"
+            },
+            
+            {
+                "alias": "Currency",
+                "name": "I_Currency",
+                "localElement": "Currencycode",
+                "element": "Currency"
+            },
+            {
+                "alias": "Vehtyp",
+                "name": "ZI_VEHTYP_VH",
+                "localElement": "Vehtype",
+                "element": "VtInternal"
+            }
+        ]
+    },
+    "children": [
+      {
+          "entityName": "VehService",
+          "dataSource": "zaa_t_vehsrv",
+          "objectId": "vehsrv_internal",
+          "uuid": "vehsrv_uuid",
+          "parentUuid": "veh_uuid",
+          "etagMaster": "last_changed_at",
+          "lastChangedAt": "local_last_changed_at",
+          "lastChangedBy": "local_last_changed_by",
+          "localInstanceLastChangedAt": "last_changed_at",
+          "createdAt": "local_created_at",
+          "createdBy": "local_created_by"
+          }]
+}

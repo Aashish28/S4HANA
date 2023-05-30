@@ -1,0 +1,12 @@
+@EndUserText.label: 'Abstract entity for vehicle'
+//@ObjectModel.query.implementedBy: 'ABAP:ZCL_CCE_VEH'
+define abstract entity ZI_CAE_VEH 
+{
+  @EndUserText.label : 'Vehicle Id'
+  veh_internal          : abap.int4;
+  @EndUserText.label : 'Vehicle Name'
+  vehname               : abap.char(60);
+  vehtype               : zaa_de_vehtype;
+  fueltype              : zaa_de_fueltype; 
+    
+}

@@ -1,0 +1,15 @@
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'Value help for vehicle type'
+@Search.searchable: true
+define view entity ZI_VEHTYP_VH
+  as select from ZI_VEHTYP_M
+{
+  @Search.defaultSearchElement: true
+  @ObjectModel.text.element: ['Vtfname']
+  key VtInternal,
+  @Search.defaultSearchElement: true
+  @Search.fuzzinessThreshold: 0.90 
+  @Semantics.text: true
+  @EndUserText.label: 'Vehicle Type Name'
+  Vtfname  
+}

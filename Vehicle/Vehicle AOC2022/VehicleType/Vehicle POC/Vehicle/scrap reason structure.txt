@@ -1,0 +1,6 @@
+@EndUserText.label : 'Reason struxture'
+@AbapCatalog.enhancementCategory : #EXTENSIBLE_CHARACTER_NUMERIC
+define structure yza_st_reason {
+  reason : yza_de_reason;
+
+}

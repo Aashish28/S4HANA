@@ -1,0 +1,77 @@
+@Metadata.layer: #CUSTOMER
+
+@UI: {
+    headerInfo: {
+    typeImageUrl: 'sap-icon://customer',
+    typeName: 'Owner',
+    typeNamePlural: 'Owners',
+    title: { type: #STANDARD, label: 'Vehicle Maintenance', value: 'Customer'},
+    description: {  label: 'Vehicle Name', value: 'CustomerName' }
+    }
+}
+
+annotate view YZA_C_OWNER
+    with 
+{
+
+@UI.facet: [
+      {
+       id:       'Owner',
+       purpose:  #STANDARD,
+       type:     #IDENTIFICATION_REFERENCE,
+       label:    'Owner Information',
+       position: 10 
+      },
+      
+      {
+       id:       'Vehicle',
+       purpose:  #STANDARD,
+       type:     #LINEITEM_REFERENCE,
+       label:    'Vehicle List',
+       targetElement: '_Vehicle',
+       position: 20 
+       }
+      ]
+
+
+  @UI: {
+        lineItem: [ { position: 10, label: 'Owner', importance: #HIGH }],
+        selectionField: [ { position: 10 } ],
+        identification:[ { position: 20, label: 'Owner' } ]
+    }    
+    Customer;
+  @UI: {
+        lineItem: [ { position: 20, label: 'Owner Name', importance: #HIGH }],
+        selectionField: [ { position: 20 } ],
+        identification:[ { position: 20, label: 'Owner Name' } ]
+    }    
+    CustomerName;
+  @UI: {
+        lineItem: [ { position: 30, label: 'Country', importance: #HIGH }],
+        selectionField: [ { position: 30 } ],
+        identification:[ { position: 30, label: 'Country' } ]
+    }    
+    Country;
+  @UI: {
+        lineItem: [ { position: 40, label: 'City', importance: #HIGH }],
+        identification:[ { position: 40, label: 'City' } ]
+    }    
+    CityName;
+  @UI: {
+        lineItem: [ { position: 50, label: 'Postal', importance: #HIGH }],
+        selectionField: [ { position: 50 } ],
+        identification:[ { position: 50, label: 'Postal' } ]
+    }    
+    PostalCode;
+  @UI: {
+        lineItem: [ { position: 60, label: 'Street', importance: #HIGH }],
+        identification:[ { position: 60, label: 'Street' } ]
+    }    
+    StreetName;
+  @UI: {
+        lineItem: [ { position: 70, label: 'Region', importance: #HIGH }],
+        identification:[ { position: 70, label: 'Region' } ]
+    }    
+    Region;
+        
+}

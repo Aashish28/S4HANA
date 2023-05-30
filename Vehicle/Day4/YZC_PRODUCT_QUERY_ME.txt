@@ -1,0 +1,90 @@
+@Metadata.layer: #CUSTOMER
+
+@UI.selectionPresentationVariant: [
+{
+    qualifier: 'Default',
+    presentationVariantQualifier: 'Default',
+    selectionVariantQualifier: 'Default'
+}]
+
+@UI.presentationVariant: [{ 
+    qualifier: 'FilterProductByWeightUnit',
+    text: 'Filter: Product By Weight Unit',
+    visualizations: [{
+        type: #AS_CHART,
+        qualifier: 'ChartProductByWeightUnit'
+    }] 
+ },
+    {
+    qualifier: 'Default',
+    visualizations: [{
+        type: #AS_CHART,
+        qualifier: 'ChartDefault'
+    }]
+}]
+
+@UI.selectionVariant: [
+{
+    qualifier: 'Default',
+    text: 'Default'
+}]
+
+@UI.chart: [
+{
+    qualifier: 'ChartProductByWeightUnit',
+    chartType: #DONUT,
+    dimensions:  [ 'WeightUnit' ], 
+    measures:  [ 'TotalProduct' ],
+    dimensionAttributes: [{
+        dimension: 'WeightUnit',
+        role: #CATEGORY
+    }],
+    measureAttributes: [{
+        measure: 'TotalProduct',
+        role: #AXIS_1
+    }]
+},
+
+    {
+    qualifier: 'ChartDefault',
+    chartType: #COLUMN,
+    dimensions:  [ 'ProductCategory','Currency' ], 
+    measures:  [ 'TotalProduct' ],
+    dimensionAttributes: [{
+        dimension: 'ProductCategory',
+        role: #SERIES
+    },{
+        dimension: 'Currency',
+        role: #CATEGORY
+    }],
+    measureAttributes: [{
+        measure: 'TotalProduct',
+        role: #AXIS_1
+    }]
+}]
+
+annotate entity YZC_PRODUCT_QUERY
+    with 
+{
+    @UI: {
+        lineItem: [{position : 10 , label: 'Product Category'}], 
+        selectionField: [ { position: 10 } ]
+    } 
+    ProductCategory;
+    
+    @UI: {
+        selectionField: [ { position: 20 } ]
+    } 
+    Currency;
+    @UI: {
+        selectionField: [ { position: 30 } ]
+    } 
+    WeightUnit;    
+
+    @UI.dataPoint.title: 'Total Product'
+    @UI.dataPoint.criticalityValue: #NEGATIVE
+    @UI: {
+        lineItem: [{position : 20 , label: 'Total Product' }]
+    }    
+    TotalProduct;    
+}

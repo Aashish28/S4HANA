@@ -1,0 +1,17 @@
+{
+    "$schema": "https://raw.githubusercontent.com/SAP-samples/cloud-abap-rap/main/json_schemas/RAPGenerator-schema-all.json",
+    "namespace": "Z",
+    "bindingType": "odata_v2_ui",
+    "dataSourceType": "table",
+    "implementationtype": "unmanaged_semantic",
+    "package": "ZABAP22",
+    "draftenabled": false,
+    "prefix": "",
+    "suffix": "_UM",
+    "hierarchy": {
+        "entityName": "User",
+        "dataSource": "zaa_t_user",
+        "objectId": "uid_uuid",
+        "etagMaster": "last_changed_at"
+    }
+}

@@ -1,0 +1,12 @@
+@EndUserText.label: 'User VH'
+@AccessControl.authorizationCheck: #CHECK
+@Search.searchable: true
+define view entity ZI_USER_VH as select from zaa_t_user{
+  @Search.defaultSearchElement: true
+  @ObjectModel.text.element: ['Uname']
+  key uid_internal as Uidinternal,
+  @Search.defaultSearchElement: true
+  @Search.fuzzinessThreshold: 0.90 
+  @Semantics.text: true
+  uname as Uname  
+}

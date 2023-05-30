@@ -1,0 +1,349 @@
+CLASS lsc_zi_vehicle_md DEFINITION INHERITING FROM cl_abap_behavior_saver.
+
+  PROTECTED SECTION.
+
+    METHODS save_modified REDEFINITION.
+
+ENDCLASS.
+
+CLASS lsc_zi_vehicle_md IMPLEMENTATION.
+
+  METHOD save_modified.
+    data vehicles type STANDARD TABLE OF zaa_t_veh.
+    if CREATE-vehicle is NOT INITIAL.
+       loop at CREATE-vehicle into data(vehicle).
+        data(lv_vehtype) = vehicle-Vehtype.
+
+        SELECT SINGLE totalcount FROM zaa_t_vehtype WHERE vt_internal = @lv_vehtype INTO @DATA(ls_vehtypecount).
+
+        ls_vehtypecount = ls_vehtypecount  + 1.
+        update zaa_t_vehtype set totalcount = @ls_vehtypecount WHERE vt_internal = @lv_vehtype.
+
+       ENDLOOP.
+
+    endif.
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+CLASS LHC_VEHICLE DEFINITION INHERITING FROM CL_ABAP_BEHAVIOR_HANDLER.
+  PRIVATE SECTION.
+    METHODS:
+      CALCULATEVEHINTERNAL FOR DETERMINE ON SAVE
+        IMPORTING
+          KEYS FOR  Vehicle~CalculateVehInternal ,
+      get_instance_features FOR INSTANCE FEATURES
+            IMPORTING keys REQUEST requested_features FOR Vehicle RESULT result.
+
+          METHODS setStatus FOR MODIFY
+            IMPORTING keys FOR ACTION Vehicle~setStatus RESULT result.
+          METHODS copyVehicle FOR MODIFY
+            IMPORTING keys FOR ACTION Vehicle~copyVehicle.
+
+          METHODS allMandatoryFields FOR VALIDATE ON SAVE
+            IMPORTING keys FOR Vehicle~allMandatoryFields.
+          METHODS calculateRoadTax FOR DETERMINE ON MODIFY
+            IMPORTING keys FOR Vehicle~calculateRoadTax.
+          METHODS computeRoadTax FOR READ
+            IMPORTING keys FOR FUNCTION Vehicle~computeRoadTax RESULT result.
+ENDCLASS.
+
+CLASS LHC_VEHICLE IMPLEMENTATION.
+  METHOD CALCULATEVEHINTERNAL.
+
+*     READ ENTITIES OF zi_vehicle_md IN LOCAL MODE
+*         ENTITY Vehicle
+*           ALL FIELDS WITH
+*             VALUE #( FOR key IN keys ( %key = key-%key ) )
+*         RESULT DATA(lt_vehicle)
+*         EXECUTE computeRoadTax FROM CORRESPONDING #( keys ) RESULT DATA(rt_tax).
+
+      "Ensure idempotence
+    READ ENTITIES OF zi_vehicle_md IN LOCAL MODE
+      ENTITY Vehicle
+        FIELDS ( VehInternal )
+        WITH CORRESPONDING #( keys )
+      RESULT DATA(Vehicles).
+
+    DELETE Vehicles WHERE VehInternal IS NOT INITIAL.
+    CHECK Vehicles IS NOT INITIAL.
+
+    "Get max VehicleId
+    SELECT SINGLE FROM zaa_t_veh FIELDS MAX( veh_internal ) INTO @DATA(max_vid).
+
+    "update involved instances
+    MODIFY ENTITIES OF zi_vehicle_md IN LOCAL MODE
+      ENTITY Vehicle
+        UPDATE FIELDS ( VehInternal )
+        WITH VALUE #( FOR Vehicle IN Vehicles INDEX INTO i (
+                           %tky      = Vehicle-%tky
+                           VehInternal  = max_vid + i ) ).
+
+  ENDMETHOD.
+  METHOD get_instance_features.
+  ENDMETHOD.
+
+  METHOD setStatus.
+
+    " Modify in local mode
+    MODIFY ENTITIES OF zi_vehicle_md IN LOCAL MODE
+           ENTITY Vehicle
+              UPDATE FROM VALUE #( for key in keys ( %key = key-%key
+                                                     Overallstatus = key-%param-overallstatus
+                                                     Reason = key-%param-reason
+                                                     Statusdate = cl_abap_context_info=>get_system_date(  )
+                                                     %control-Overallstatus = if_abap_behv=>mk-on
+                                                     %control-Reason = if_abap_behv=>mk-on
+                                                     %control-Statusdate = if_abap_behv=>mk-on ) )
+           FAILED   failed
+           REPORTED reported.
+
+    " Read changed data for action result
+    READ ENTITIES OF zi_vehicle_md IN LOCAL MODE
+         ENTITY Vehicle
+           ALL FIELDS WITH
+             VALUE #( FOR key IN keys ( %key = key-%key ) )
+         RESULT DATA(lt_vehicle).
+
+    result = VALUE #( FOR ls_vehicle IN lt_vehicle ( %key = ls_vehicle-%key
+                                                %param    = ls_vehicle ) ).
+
+
+  ENDMETHOD.
+
+  METHOD copyVehicle.
+
+      DATA : vehicle TYPE TABLE FOR CREATE zi_vehicle_md\\Vehicle.
+
+    READ ENTITIES OF zi_vehicle_md IN LOCAL MODE
+         ENTITY Vehicle
+         ALL FIELDS WITH CORRESPONDING #( keys )
+         RESULT DATA(lt_vehicle) FAILED failed.
+
+    LOOP AT lt_vehicle ASSIGNING FIELD-SYMBOL(<fs_vehicle>).
+
+        APPEND VALUE #( %cid = keys[ 1 ]-%cid
+                        %is_draft = '01'
+                        %data = CORRESPONDING #( <fs_vehicle> EXCEPT VehInternal ) )
+                        TO vehicle ASSIGNING FIELD-SYMBOL(<fs_new_vehicle>).
+
+                        ENDLOOP.
+        <fs_new_vehicle>-Vehname = |Copy of { <fs_vehicle>-VehInternal }|.
+
+
+    MODIFY ENTITIES of zi_vehicle_md IN LOCAL MODE
+        ENTITY Vehicle
+        CREATE FIELDS ( Vehname Vehtype Fueltype Color Cc Totalprice Currencycode Country Mfyear Mf
+          )
+        WITH vehicle
+        MAPPED DATA(mapped_create)
+        FAILED DATA(failed_create)
+        REPORTED DATA(reported_create).
+
+   READ ENTITIES OF zi_vehicle_md IN LOCAL MODE
+        ENTITY Vehicle
+        ALL FIELDS WITH CORRESPONDING #( mapped_create-vehicle )
+        RESULT DATA(read_created_result).
+
+    mapped-Vehicle = mapped_create-vehicle.
+
+  ENDMETHOD.
+
+  METHOD allMandatoryFields.
+     READ ENTITIES OF zi_vehicle_md IN LOCAL MODE
+    ENTITY Vehicle
+     ALL FIELDS
+     WITH CORRESPONDING #(  keys )
+    RESULT DATA(lt_vehicle)
+    failed data(lt_vehicle_failed)
+    reported data(lt_vehicle_reported).
+
+    LOOP AT lt_vehicle INTO DATA(ls_vehicle).
+        "Clear state area for instance
+        APPEND VALUE #( %tky       = ls_vehicle-%tky
+                %state_area = if_abap_behv=>state_area_all ) TO REPORTED-vehicle.
+
+       if ls_vehicle-Vehname is initial.
+          APPEND value #( %tky = ls_vehicle-%tky
+           ) to failed-vehicle.
+          APPEND value #( %tky = ls_vehicle-%tky
+                        %state_area  = 'VALIDATE_VEHICLENAME'
+                          %msg = new_message_with_text( text = 'Vehicle Name is mandatory'
+                          severity  = if_abap_behv_message=>severity-error )
+                          %element-Vehname = if_abap_behv=>mk-on
+                        ) to reported-vehicle.
+        endif.
+
+       if ls_vehicle-Vehtype is initial.
+          APPEND value #( %tky = ls_vehicle-%tky ) to failed-vehicle.
+          APPEND value #( %tky = ls_vehicle-%tky
+                          %msg = new_message_with_text( text = 'Vehicle type is mandatory'
+                          severity  = if_abap_behv_message=>severity-error )
+                          %element-Vehtype = if_abap_behv=>mk-on
+                        ) to reported-vehicle.
+        endif.
+
+       if ls_vehicle-Fueltype is initial.
+          APPEND value #( %tky = ls_vehicle-%tky ) to failed-vehicle.
+          APPEND value #( %tky = ls_vehicle-%tky
+                          %msg = new_message_with_text( text = 'Fule type is mandatory'
+                          severity  = if_abap_behv_message=>severity-error )
+                          %element-Fueltype = if_abap_behv=>mk-on
+                        ) to reported-vehicle.
+        endif.
+
+    ENDLOOP.
+
+  ENDMETHOD.
+
+*  METHOD computeRoadTax.
+
+*    READ ENTITIES OF zi_vehicle_md IN LOCAL MODE
+*         ENTITY Vehicle
+*           ALL FIELDS WITH
+*             VALUE #( FOR key IN keys ( %key = key-%key ) )
+*         RESULT DATA(lt_vehicle).
+*
+*        "update involved instances
+*    MODIFY ENTITIES OF zi_vehicle_md IN LOCAL MODE
+*      ENTITY Vehicle
+*        UPDATE FIELDS ( VehInternal )
+*        WITH VALUE #( FOR Vehicle IN Vehicles INDEX INTO i (
+*                           %tky      = Vehicle-%tky
+*                           VehInternal  = max_vid + i ) ).
+*
+*
+*    result = VALUE #( FOR ls_vehicle IN lt_vehicle ( %key = ls_vehicle-%key
+*                                                %param    = ls_vehicle ) ).
+
+
+* ENDMETHOD.
+
+  METHOD calculateRoadTax.
+
+*** working *****
+
+      " Read all relevant travel instances.
+*    READ ENTITIES OF zi_vehicle_md IN LOCAL MODE
+*         ENTITY Vehicle
+*            FIELDS ( Roadtax )
+*            WITH CORRESPONDING #( keys )
+*         RESULT DATA(lt_vehicle).
+*
+*            DELETE lt_vehicle WHERE Currencycode IS INITIAL.
+*
+*         if lt_vehicle is not initial.
+*
+*         LOOP AT lt_vehicle ASSIGNING FIELD-SYMBOL(<vehicle>).
+*             <vehicle>-Roadtax = '1000'.
+*         ENDLOOP.
+*
+*    MODIFY ENTITIES OF zi_vehicle_md IN LOCAL MODE
+*      ENTITY Vehicle
+*        UPDATE FIELDS ( Roadtax )
+*        WITH CORRESPONDING  #( lt_vehicle )
+**        WITH VALUE #( FOR ls_vehicle IN lt_vehicle ( %key = ls_vehicle-%key
+**                                              Roadtax = ls_vehicle-Roadtax ) )
+*                                              FAILED   DATA(lt_failed)
+*                                               REPORTED DATA(lt_reported).
+*        endif.
+
+
+*** working *****
+
+     READ ENTITIES OF zi_vehicle_md IN LOCAL MODE
+         ENTITY Vehicle
+           FIELDS ( Roadtax )
+            WITH CORRESPONDING #( keys )
+         RESULT DATA(lt_vehicle)
+         EXECUTE computeRoadTax FROM CORRESPONDING #( keys ) RESULT DATA(rt_tax).
+
+    DELETE lt_vehicle WHERE Currencycode IS INITIAL.
+
+    if lt_vehicle is not initial.
+    "lt_vehicle[ 1 ]-Roadtax = '1200'.
+    "update involved instances
+    LOOP AT lt_vehicle ASSIGNING FIELD-SYMBOL(<fs_vehicle>).
+        <fs_vehicle>-Roadtax = rt_tax[ 1 ]-%param-Roadtax.
+    ENDLOOP.
+
+    MODIFY ENTITIES OF zi_vehicle_md IN LOCAL MODE
+      ENTITY Vehicle
+      UPDATE FIELDS ( Roadtax ) WITH VALUE #( for rs_tax in rt_tax
+                                        ( %tky = rs_tax-%param-%tky
+                                        Roadtax = '500' ) ).
+*** working ***
+
+*    MODIFY ENTITIES OF zi_vehicle_md IN LOCAL MODE
+*      ENTITY Vehicle
+*      UPDATE FIELDS ( Roadtax )
+*      WITH CORRESPONDING  #( lt_vehicle )
+**      #( FOR rs_tax IN rt_tax ( %key          = rs_tax-%key
+**                               Roadtax = rs_tax-%param-Roadtax ) )
+**      #( for rs_tax in rt_tax
+**                                      ( %key = rs_tax-%key
+**                                        %is_draft = rs_tax-%is_draft
+**                                        Roadtax = rs_tax-%param-Roadtax
+**                                        %control-Roadtax = if_abap_behv=>mk-on
+**                                         ) )
+*           FAILED   DATA(lt_failed)
+*           REPORTED DATA(lt_reported).
+
+**Not not **
+
+*           reported = CORRESPONDING #( DEEP lt_reported ).
+*        UPDATE FIELDS ( Roadtax )
+*        WITH CORRESPONDING #( lt_vehicle ).
+*        WITH VALUE #( for ls_vehicle in lt_vehicle ( %tky = ls_vehicle-%tky
+*                                                     Roadtax = '1000.00' "rs_tax-%param-Roadtax
+*                                                     %control-Roadtax = if_abap_behv=>mk-on
+*                                                      ) ).
+    endif.
+
+  ENDMETHOD.
+
+
+  METHOD computeRoadTax.
+*    READ ENTITIES OF zi_vehicle_md IN LOCAL MODE
+*         ENTITY Vehicle
+*           ALL FIELDS WITH
+*             VALUE #( FOR key IN keys ( %key = key-%key ) )
+*         RESULT DATA(lt_vehicle).
+*
+*    LOOP AT lt_vehicle ASSIGNING FIELD-SYMBOL(<fs_vehicle>).
+*
+*    if <fs_vehicle>-Fueltype = 'P'.
+*        <fs_vehicle>-Roadtax = '1500'.
+*    else.
+*        <fs_vehicle>-Roadtax = '1000'.
+*    endif.
+*
+*    ENDLOOP.
+*
+*    result = VALUE #( FOR ls_vehicle IN lt_vehicle ( %key = ls_vehicle-%key
+*                                                     %param = ls_vehicle ) ).
+
+
+    READ ENTITIES OF zi_vehicle_md IN LOCAL MODE
+         ENTITY Vehicle
+            FIELDS ( Roadtax )
+            WITH CORRESPONDING #( keys )
+         RESULT DATA(lt_vehicle).
+
+    LOOP AT lt_vehicle ASSIGNING FIELD-SYMBOL(<fs_vehicle>).
+
+    if <fs_vehicle>-Fueltype = 'P'.
+        <fs_vehicle>-Roadtax = '1500'.
+    else.
+        <fs_vehicle>-Roadtax = '1000'.
+    endif.
+
+    ENDLOOP.
+
+    result = VALUE #( FOR ls_vehicle IN lt_vehicle ( %key = ls_vehicle-%key
+                                                     %param = ls_vehicle ) ).
+
+  ENDMETHOD.
+
+ENDCLASS.

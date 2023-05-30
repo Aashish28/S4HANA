@@ -1,0 +1,161 @@
+CLASS lcl_buffer DEFINITION.
+* 1) define the data buffer
+  PUBLIC SECTION.
+
+    TYPES: BEGIN OF ty_buffer.
+             INCLUDE TYPE   zaa_t_mf AS data.
+    TYPES:   flag TYPE c LENGTH 1,
+           END OF ty_buffer.
+
+    TYPES tt_mf TYPE SORTED TABLE OF ty_buffer WITH UNIQUE KEY mfid.
+
+    CLASS-DATA mt_buffer TYPE tt_mf.
+ENDCLASS.
+
+CLASS LHC_MANF DEFINITION INHERITING FROM CL_ABAP_BEHAVIOR_HANDLER.
+  PRIVATE SECTION.
+    METHODS:
+      CREATE FOR MODIFY
+        IMPORTING
+          ENTITIES FOR CREATE  Manf,
+      UPDATE FOR MODIFY
+        IMPORTING
+          ENTITIES FOR UPDATE  Manf,
+      DELETE FOR MODIFY
+        IMPORTING
+          KEYS FOR DELETE  Manf,
+      LOCK FOR LOCK
+        IMPORTING
+          KEYS FOR LOCK  Manf,
+      READ FOR READ
+        IMPORTING
+          KEYS FOR READ  Manf
+        RESULT result.
+ENDCLASS.
+
+CLASS LHC_MANF IMPLEMENTATION.
+  METHOD CREATE.
+    LOOP AT entities INTO DATA(ls_create).
+      SELECT SINGLE MAX( mfid ) FROM zaa_t_mf INTO @DATA(lv_max_mfid).
+      lv_max_mfid = lv_max_mfid + 1.
+      ls_create-%data-mfid = lv_max_mfid.
+
+      GET TIME STAMP FIELD DATA(lv_tsl).
+      ls_create-%data-lastchangedat = lv_tsl.
+      ls_create-%data-LocalCreatedBy = sy-uname.
+      ls_create-%data-LocalCreatedAt = lv_tsl.
+
+
+      DATA: messages   TYPE /dmo/t_message.
+       if ls_create-Mfname is INITIAL.
+       APPEND value #( mfid = ls_create-mfid ) to failed-manf.
+       APPEND value #( mfid = ls_create-mfid
+                              %msg = new_message_with_text( text = | MF Name { ls_create-Mfname } is mandatory |
+                              severity  = if_abap_behv_message=>severity-error )
+                              %element-mfname = if_abap_behv=>mk-on
+                            ) to reported-manf.
+       else.
+
+
+      INSERT VALUE #( flag = 'C' data = CORRESPONDING #( ls_create-%data
+      MAPPING  mfid = MfID
+               Mfname = Mfname
+               country = country
+                local_created_by = LocalCreatedBy
+                local_created_at = LocalCreatedAt
+                local_last_changed_by = LocalLastChangedBy
+                local_last_changed_at = LocalLastChangedAt
+                last_changed_at = LastChangedAt
+                 ) ) INTO TABLE lcl_buffer=>mt_buffer.
+
+      IF ls_create-%cid IS NOT INITIAL.
+        INSERT VALUE #( %cid = ls_create-%cid  mfid = ls_create-mfid ) INTO TABLE mapped-manf.
+      ENDIF.
+
+      endif.
+
+
+    ENDLOOP.
+  ENDMETHOD.
+  METHOD UPDATE.
+    LOOP AT entities INTO DATA(ls_update).
+
+      READ TABLE lcl_buffer=>mt_buffer WITH KEY mfid = ls_update-mfid ASSIGNING FIELD-SYMBOL(<ls_buffer>).
+      IF sy-subrc <> 0.
+
+        SELECT SINGLE * FROM zaa_t_mf WHERE mfid = @ls_update-mfid INTO @DATA(ls_db).
+        INSERT VALUE #( flag = 'U' data = ls_db ) INTO TABLE lcl_buffer=>mt_buffer ASSIGNING <ls_buffer>.
+      ENDIF.
+
+      IF ls_update-%control-mfname IS NOT INITIAL.
+        <ls_buffer>-mfname = ls_update-mfname.
+      ENDIF.
+
+      GET TIME STAMP FIELD DATA(lv_tsl).
+      <ls_buffer>-last_changed_at = lv_tsl.
+      <ls_buffer>-Local_Last_Changed_By = sy-uname.
+      <ls_buffer>-Local_Last_Changed_At = lv_tsl.
+
+    ENDLOOP.
+  ENDMETHOD.
+  METHOD DELETE.
+     LOOP AT keys INTO DATA(ls_delete).
+      IF ls_delete-mfid IS INITIAL.
+        ls_delete-mfid = mapped-manf[ %cid = ls_delete-%cid_ref ]-mfid.
+      ENDIF.
+
+      READ TABLE lcl_buffer=>mt_buffer WITH KEY mfid = ls_delete-mfid ASSIGNING field-symbol(<ls_buffer>).
+      IF sy-subrc = 0.
+        IF <ls_buffer>-flag = 'C'.
+          DELETE TABLE lcl_buffer=>mt_buffer WITH TABLE KEY mfid = ls_delete-mfid.
+        ELSE.
+          <ls_buffer>-flag = 'D'.
+        ENDIF.
+      ELSE.
+        INSERT VALUE #( flag = 'D' mfid = ls_delete-mfid ) INTO TABLE lcl_buffer=>mt_buffer.
+      ENDIF.
+    ENDLOOP.
+  ENDMETHOD.
+  METHOD LOCK.
+  ENDMETHOD.
+  METHOD READ.
+  ENDMETHOD.
+ENDCLASS.
+CLASS LCL_ZI_MANF_UM DEFINITION INHERITING FROM CL_ABAP_BEHAVIOR_SAVER.
+  PROTECTED SECTION.
+    METHODS:
+      FINALIZE REDEFINITION,
+      CHECK_BEFORE_SAVE REDEFINITION,
+      SAVE REDEFINITION,
+      CLEANUP REDEFINITION,
+      CLEANUP_FINALIZE REDEFINITION.
+ENDCLASS.
+
+CLASS LCL_ZI_MANF_UM IMPLEMENTATION.
+  METHOD FINALIZE.
+  ENDMETHOD.
+  METHOD CHECK_BEFORE_SAVE.
+  ENDMETHOD.
+  METHOD SAVE.
+      DATA lt_data TYPE STANDARD TABLE OF zaa_t_mf.
+
+    lt_data = VALUE #(  FOR row IN lcl_buffer=>mt_buffer WHERE  ( flag = 'C' ) (  row-data ) ).
+    IF lt_data IS NOT INITIAL.
+      INSERT zaa_t_mf FROM TABLE @lt_data.
+    ENDIF.
+
+    lt_data = VALUE #(  FOR row IN lcl_buffer=>mt_buffer WHERE  ( flag = 'U' ) (  row-data ) ).
+    IF lt_data IS NOT INITIAL.
+      UPDATE zaa_t_mf FROM TABLE @lt_data.
+    ENDIF.
+
+    lt_data = VALUE #(  FOR row IN lcl_buffer=>mt_buffer WHERE  ( flag = 'D' ) (  row-data ) ).
+    IF lt_data IS NOT INITIAL.
+      DELETE zaa_t_mf FROM TABLE @lt_data.
+    ENDIF.
+  ENDMETHOD.
+  METHOD CLEANUP.
+  ENDMETHOD.
+  METHOD CLEANUP_FINALIZE.
+  ENDMETHOD.
+ENDCLASS.

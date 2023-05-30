@@ -1,0 +1,89 @@
+@AccessControl.authorizationCheck: #CHECK
+@Metadata.allowExtensions: true
+@EndUserText.label: 'Annotation in metadata extension vehicle'
+@ObjectModel.semanticKey: [ 'VehInternal' ]
+@Search.searchable: true
+define view entity YC_VEHME_ANNO
+  as select from ZI_VEHICLE_MD
+{
+  key VehUUID,
+  @Search.defaultSearchElement: true
+  @Search.fuzzinessThreshold: 0.90 
+  VehInternal,
+  Vnumber,
+  Vehname,
+  @ObjectModel.text.element: ['VehTypeName']  
+  @Consumption.valueHelpDefinition: [ {
+    entity: {
+      name: 'ZI_VEHTYP_VH', 
+      element: 'VtInternal'
+    }
+  } ]
+  Vehtype,
+  _Vehtyp.Vtfname as VehTypeName,
+  @ObjectModel.text.element: ['FuelTypeName']  
+  @Consumption.valueHelpDefinition: [ {
+    entity: {
+      name: 'ZI_FUEL_VH', 
+      element: 'FtID'
+    }
+  } ]
+  Fueltype,
+  _Fueltyp.Ftname as FuelTypeName,
+  Color,
+  Cc,
+  @Semantics.amount.currencyCode: 'Currencycode'
+  Totalprice,
+  @Consumption.valueHelpDefinition: [ {
+    entity: {
+      name: 'I_Currency', 
+      element: 'Currency'
+    }
+  } ]
+  Currencycode,
+  @ObjectModel.foreignKey.association: '_Country'
+  Country,
+  @ObjectModel.text.element: ['OwnerName']
+  @Consumption.valueHelpDefinition: [ {
+    entity: {
+      name: 'ZI_USER_VH', 
+      element: 'Uidinternal'
+    }
+  } ]
+  Owner,
+  _Owner.Uname as OwnerName,
+  Mfyear,
+  @ObjectModel.text.element: ['ManfName']
+  @Consumption.valueHelpDefinition: [ {
+    entity: {
+      name: 'ZI_MANF_VH', 
+      element: 'MfID'
+    },additionalBinding: [{ element: 'Country', localElement: 'Country' }]
+  }]
+  Mf,
+  _Manf.Mfname as ManfName,
+
+  Purchasedate,
+  Statusdate,
+  @ObjectModel.text.element: ['OverallStatusText']
+  @Consumption.valueHelpDefinition: [ {
+    entity: {
+      name: '/DMO/I_Overall_Status_VH', 
+      element: 'OverallStatus'
+    }
+  } ]
+  Overallstatus,
+  _OverallStatus._Text.Text as OverallStatusText,
+  Reason,
+  case _Manf.Mfname 
+        when 'BMW' then '5'
+        when 'TATA' then '4'
+        else '2'
+    end as VehRating,
+  
+  _Country,
+  _OverallStatus,
+  _Currency,
+  _Vehtyp
+  
+}

@@ -1,0 +1,14 @@
+@EndUserText.label: 'Fule VH'
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@Search.searchable: true
+@ObjectModel.dataCategory: #VALUE_HELP
+@ObjectModel.resultSet.sizeCategory: #XS
+define view entity ZI_FUEL_VH as select from ZI_FULE_M {
+  @Search.defaultSearchElement: true
+  @ObjectModel.text.element: ['Ftname']
+  key FtID,
+  @Search.defaultSearchElement: true
+  @Search.fuzzinessThreshold: 0.90 
+  @Semantics.text: true
+  Ftname  
+} where Available = 'Y'

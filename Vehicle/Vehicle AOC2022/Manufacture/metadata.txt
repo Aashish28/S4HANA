@@ -1,0 +1,88 @@
+@Metadata.layer: #CUSTOMER
+@UI: {
+  headerInfo: {
+    typeName: 'Manufacturer', 
+    typeNamePlural: 'Manufacturers', 
+    title: {
+      type: #STANDARD, 
+      label: 'Manufacturer', 
+      value: 'MfID'
+    }
+  }, 
+  presentationVariant: [ {
+    sortOrder: [ {
+      by: 'MfID', 
+      direction: #DESC
+    } ], 
+    visualizations: [ {
+      type: #AS_LINEITEM
+    } ]
+  } ]
+}
+annotate view ZC_MANF_UM with
+{
+  @UI.facet: [ {
+    id: 'idCollection', 
+    type: #COLLECTION, 
+    label: 'Manufacturer', 
+    position: 10 
+  }, 
+  {
+    id: 'idIdentification', 
+    parentId: 'idCollection', 
+    type: #IDENTIFICATION_REFERENCE, 
+    label: 'General Information', 
+    position: 10 
+  } ]
+  @UI.lineItem: [ {
+    position: 10 , 
+    importance: #HIGH,
+    label: 'Id'
+  } ]
+  @UI.identification: [ {
+    position: 10, 
+    label: 'Id'
+  } ]
+  @UI.selectionField: [ {
+    position: 10 
+  } ]
+  MfID;
+  
+  @UI.lineItem: [ {
+    position: 20 , 
+    importance: #HIGH, 
+    label: 'Name'
+  } ]
+  @UI.identification: [ {
+    position: 20 , 
+    label: 'Name'
+  } ]
+  Mfname;
+  
+  @UI.lineItem: [ {
+    position: 30 , 
+    importance: #HIGH
+  } ]
+  @UI.identification: [ {
+    position: 30 
+  } ]
+  @UI.selectionField: [ {
+    position: 30 
+  } ]
+  Country;
+  
+  @UI.hidden: true
+  LocalCreatedBy;
+  
+  @UI.hidden: true
+  LocalCreatedAt;
+  
+  @UI.hidden: true
+  LocalLastChangedBy;
+  
+  @UI.hidden: true
+  LocalLastChangedAt;
+  
+  @UI.hidden: true
+  LastChangedAt;
+}

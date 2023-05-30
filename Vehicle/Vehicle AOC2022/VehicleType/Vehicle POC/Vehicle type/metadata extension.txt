@@ -1,0 +1,70 @@
+@Metadata.layer: #CUSTOMER
+
+@UI: {
+    headerInfo: {
+    
+    typeImageUrl: 'sap-icon://insurance-car',
+    typeName: 'Vehicle Type',
+    typeNamePlural: 'Vehicle Types',
+    title: { type: #STANDARD, label: 'Vehicle Type Maintenance', value: 'VehicleType'},
+    description: {  label: 'Vehicle Type', value: 'VehicleTypeText' }
+    }
+}
+
+@UI.selectionVariant: [{ qualifier: 'Approved', text: 'Approved' , filter:'ReadyToUse EQ "YES"'},
+                       { qualifier: 'NotApproved', text: 'Not Approved' , filter:'ReadyToUse EQ "NO"'}
+                      ]
+        
+annotate view YZA_C_VEHTYPE
+    with 
+{
+
+        @UI.facet: [
+        { 
+            label: 'Maintain Vehicle Type',
+            id: 'HeaderInfo',
+            purpose: #STANDARD,
+            type: #COLLECTION,
+            position: 10
+        },        
+        {
+            label: 'Type Information',
+            id : 'TypeInfo',
+            parentId: 'HeaderInfo',
+            purpose: #STANDARD,
+            type : #IDENTIFICATION_REFERENCE,
+            targetQualifier : 'TypeInfo',
+            position: 10
+        }
+        ]
+
+    //YZA_C_VEHTYPE
+    @UI: {
+        lineItem: [{position : 10 , label: 'Vehicle Type', importance: #HIGH }, 
+          { type: #FOR_ACTION, position: 1, dataAction: 'BOPF:SET_READY_TO_USE', label: 'Ready to use', importance: #HIGH }
+        ], 
+        identification:[ { position: 10, label: 'Vehicle Type' } ],
+        fieldGroup:[{ qualifier: 'TypeInfo', position: 10, importance: #HIGH}]
+    } 
+    VehicleType;
+     @EndUserText.label: 'Vehicle Type Text'   
+     @UI: {
+          lineItem: [ { position: 20, label: 'Vehicle Type Text', importance: #HIGH }],
+          selectionField: [ { position: 10 } ],
+          identification:[ { position: 20, label: 'Vehicle Type Text' }],
+           fieldGroup:[{ qualifier: 'TypeInfo', position: 20,  importance: #HIGH}]
+        }
+    VehicleTypeText;
+    @UI: {
+      lineItem: [ { position: 30, label: 'Ready To Use', importance: #HIGH } ]
+    }
+    ReadyToUse;
+    @UI.hidden: true 
+    crea_date_time;
+    @UI.hidden: true 
+    crea_uname;
+    @UI.hidden: true 
+    lchg_date_time;
+    @UI.hidden: true 
+    lchg_uname;    
+}

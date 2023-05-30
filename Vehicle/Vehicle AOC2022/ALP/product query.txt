@@ -1,0 +1,29 @@
+@AbapCatalog.sqlViewName: 'YZCV_PRODQUERY'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Product Query'
+@Metadata.allowExtensions: true
+@Analytics.query: true
+@OData.publish: true
+
+define view YZC_PRODUCT_QUERY as select from YZI_PRODUCT_CUBE {
+    @AnalyticsDetails.query.display: #KEY_TEXT
+    @AnalyticsDetails.query.axis: #FREE
+    Product,
+    @AnalyticsDetails.query.display: #KEY_TEXT
+    @AnalyticsDetails.query.axis: #FREE
+    ProductCategory,
+    @AnalyticsDetails.query.display: #KEY_TEXT
+    @AnalyticsDetails.query.axis: #FREE
+    Currency,
+    @AnalyticsDetails.query.display: #KEY_TEXT
+    @AnalyticsDetails.query.axis: #FREE
+    WeightUnit,
+    TotalProduct,
+    /* Associations */
+    _Currency,
+    _ProductCategory,
+    _WeightUnit,
+    _ProductTextInOriginalLang
+}

@@ -1,0 +1,42 @@
+{
+    "$schema": "https://raw.githubusercontent.com/SAP-samples/cloud-abap-rap/main/json_schemas/RAPGenerator-schema-all.json",
+    "namespace": "Y",
+    "bindingType": "odata_v2_ui",
+    "dataSourceType": "table",
+    "implementationtype": "managed_semantic",
+    "package": "YABAP22",
+    "draftenabled": false,
+    "prefix": "",
+    "suffix": "_M",
+    "hierarchy": {
+        "entityName": "Fuel",
+        "dataSource": "zaa_t_fueltype",
+        "objectId": "ftid",
+        "etagMaster": "last_changed_at",
+        "lastChangedAt": "local_last_changed_at",
+        "lastChangedBy": "local_last_changed_by",
+        "localInstanceLastChangedAt": "last_changed_at",
+        "createdAt": "local_created_at",
+        "createdBy": "local_created_by"
+    },
+    "associations": [
+        {
+          "name": "_Currency",
+          "target": "I_Currency",
+          "cardinality": "one_to_one",
+          "conditions": [
+            {
+              "projectionField": "Currencycode",
+              "associationField": "Currency"
+            }
+          ]
+        }
+      ],
+      "valueHelps": [
+        {
+            "alias": "Currency",
+            "name": "I_Currency",
+            "localElement": "Currencycode",
+            "element": "Currency"
+        }]
+}

@@ -1,0 +1,32 @@
+CLASS LHC_VEHTYP DEFINITION INHERITING FROM CL_ABAP_BEHAVIOR_HANDLER.
+  PRIVATE SECTION.
+    METHODS:
+      CALCULATEVTINTERNAL FOR DETERMINE ON SAVE
+        IMPORTING
+          KEYS FOR  Vehtyp~CalculateVtInternal .
+ENDCLASS.
+
+CLASS LHC_VEHTYP IMPLEMENTATION.
+  METHOD CALCULATEVTINTERNAL.
+    "Ensure idempotence
+    READ ENTITIES OF zi_vehtyp_m IN LOCAL MODE
+      ENTITY Vehtyp
+        FIELDS ( VtInternal )
+        WITH CORRESPONDING #( keys )
+      RESULT DATA(Vtypes).
+
+    DELETE Vtypes WHERE VtInternal IS NOT INITIAL.
+    CHECK Vtypes IS NOT INITIAL.
+
+    "Get max travelID
+    SELECT SINGLE FROM zaa_t_vehtype FIELDS MAX( vt_internal ) INTO @DATA(max_vtid).
+
+    "update involved instances
+    MODIFY ENTITIES OF zi_vehtyp_m IN LOCAL MODE
+      ENTITY Vehtyp
+        UPDATE FIELDS ( VtInternal )
+        WITH VALUE #( FOR Vtype IN Vtypes INDEX INTO i (
+                           %tky      = Vtype-%tky
+                           VtInternal  = max_vtid + i ) ).
+  ENDMETHOD.
+ENDCLASS.

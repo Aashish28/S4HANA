@@ -1,0 +1,14 @@
+@AbapCatalog.sqlViewName: 'YZA_IAD_VEHTYPE'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Vehicle Type Dimension'
+@Analytics.dataCategory: #DIMENSION
+
+define view YZA_I_AD_VEHTYPE as select from YZA_C_VEHTYPE {
+    //YZA_C_VEHTYPE
+    @ObjectModel.text.element: ['VehicleTypeText']
+    key VehicleType,
+    @Semantics.text: true
+        VehicleTypeText
+} where ReadyToUse = 'X'

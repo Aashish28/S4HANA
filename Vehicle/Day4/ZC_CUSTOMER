@@ -1,0 +1,17 @@
+@AbapCatalog.sqlViewName: 'ZCV_CUST'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Customer CDS'
+@Metadata.allowExtensions: true
+@VDM.viewType: #CONSUMPTION
+@OData.publish: true
+define view ZC_CUSTOMER as select from kna1 
+association [0..1] to ZI_COUNTRY_VH as _Country on $projection.Country = _Country.Country
+{
+    key kunnr as Customer,
+        name1 as Name,
+         @ObjectModel.foreignKey.association: '_Country'
+        land1 as Country,
+        _Country
+}

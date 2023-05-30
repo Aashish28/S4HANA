@@ -1,0 +1,34 @@
+managed;
+
+define behavior for ZI_FULE_M alias Fule
+implementation in class ZBP_I_Fule_M unique
+persistent table ZAA_T_FUELTYPE
+etag master LastChangedAt
+lock master
+
+{
+  field (mandatory:create)FtID,Ftname;
+  field (readonly) Available;
+  field (readonly : update)FtID,Ftname;
+  determination fuel_availability on modify { field FtID; }
+  validation carbon_emission on save { field FtID; }
+  action set_fuel_available result [1] $self;
+  create;
+  update;
+  delete (features : instance);
+
+  mapping for ZAA_T_FUELTYPE
+  {
+    FtID = FTID;
+    Ftname = FTNAME;
+    Price = PRICE;
+    Currencycode = CURRENCYCODE;
+    Available = AVAILABLE;
+    Carbonemm = CARBONEMM;
+    LocalCreatedBy = LOCAL_CREATED_BY;
+    LocalCreatedAt = LOCAL_CREATED_AT;
+    LocalLastChangedBy = LOCAL_LAST_CHANGED_BY;
+    LocalLastChangedAt = LOCAL_LAST_CHANGED_AT;
+    LastChangedAt = LAST_CHANGED_AT;
+  }
+}

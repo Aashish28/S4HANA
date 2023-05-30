@@ -1,0 +1,38 @@
+@EndUserText.label : 'Vehicle Table'
+@AbapCatalog.enhancement.category : #EXTENSIBLE_CHARACTER_NUMERIC
+@AbapCatalog.tableCategory : #TRANSPARENT
+@AbapCatalog.deliveryClass : #A
+@AbapCatalog.dataMaintenance : #RESTRICTED
+define table zaa_t_veh {
+  key client            : abap.clnt not null;
+  key veh_uuid          : sysuuid_x16 not null;
+  @EndUserText.label : 'Vehicle Id'
+  veh_internal          : abap.int4;
+  @EndUserText.label : 'Vehicle Number'
+  vnumber               : abap.char(12);
+  @EndUserText.label : 'Vehicle Name'
+  vehname               : abap.char(60);
+  vehtype               : zaa_de_vehtype;
+  fueltype              : zaa_de_fueltype;
+  @EndUserText.label    : 'Color'
+  color                 : abap.char(15);
+  cc                    : int4;
+  @Semantics.amount.currencyCode : 'zaa_t_veh.currencycode'
+  totalprice            : /dmo/total_price;
+  currencycode          : /dmo/currency_code;
+  country               : land1;
+  owner                 : int4;
+  mfyear                : gjahr;
+  mf                    : zaa_de_mf;
+  @EndUserText.label : 'Purchase Date'
+  purchasedate          : abap.dats;
+  @EndUserText.label : 'Expiry Date'
+  statusdate            : abap.dats;
+  overallstatus         : /dmo/overall_status;
+  reason                : abap.char(20);
+  local_created_by      : abp_creation_user;
+  local_created_at      : abp_creation_tstmpl;
+  local_last_changed_by : abp_locinst_lastchange_user;
+  local_last_changed_at : abp_locinst_lastchange_tstmpl;
+  last_changed_at       : abp_lastchange_tstmpl;
+}

@@ -1,0 +1,82 @@
+managed;
+//strict;
+with draft;
+
+define behavior for ZI_VEHICLE_MD alias Vehicle
+implementation in class ZBP_I_Vehicle_MD unique
+persistent table ZAA_T_VEH
+with additional save
+//early numbering
+//late numbering
+//extensible
+
+draft table ZVEHICLE00D_MD
+etag master LastChangedAt
+lock master total etag LastChangedAt
+
+{
+  field ( readonly )
+   VehInternal;
+   //,Overallstatus, Statusdate, Reason;
+
+  field ( numbering : managed )
+   VehUUID;
+  field ( mandatory )
+   Vehname , Vehtype , Fueltype;
+
+  validation allMandatoryFields on save { create; update; field VehInternal; }
+
+  create;
+  update;
+  delete;
+  action ( features : instance ) setStatus parameter ZA_VEH_STATUS_PARA result [1] $self;
+  factory action copyVehicle [1];
+
+  //internal action calculateTax;
+  //static action set_value result [1] $self;
+  //static factory action set_initvalue [1];
+  //static factory save action set_savevalue [1];
+  // action check external 'CheckData';
+
+  // internal function computeTax result [1] $self;
+  //static function computeTax result [1] $self;
+  // function computeTax result [1] $self;
+  // function check external 'CheckData' result [1] $self;;
+
+  draft action Edit;
+  draft action Activate;
+  draft action Discard;
+  draft action Resume;
+  draft determine action Prepare {
+   validation allMandatoryFields;
+  }
+
+  mapping for ZAA_T_VEH
+  {
+    VehUUID = VEH_UUID;
+    VehInternal = VEH_INTERNAL;
+    Vnumber = VNUMBER;
+    Vehname = VEHNAME;
+    Vehtype = VEHTYPE;
+    Fueltype = FUELTYPE;
+    Color = COLOR;
+    Cc = CC;
+    Totalprice = TOTALPRICE;
+    Currencycode = CURRENCYCODE;
+    Country = COUNTRY;
+    Owner = OWNER;
+    Mfyear = MFYEAR;
+    Mf = MF;
+    Purchasedate = PURCHASEDATE;
+    Statusdate = STATUSDATE;
+    Overallstatus = OVERALLSTATUS;
+    Reason = REASON;
+    LocalCreatedBy = LOCAL_CREATED_BY;
+    LocalCreatedAt = LOCAL_CREATED_AT;
+    LocalLastChangedBy = LOCAL_LAST_CHANGED_BY;
+    LocalLastChangedAt = LOCAL_LAST_CHANGED_AT;
+    LastChangedAt = LAST_CHANGED_AT;
+  }
+
+  determination CalculateVehInternal on save { create; }
+}

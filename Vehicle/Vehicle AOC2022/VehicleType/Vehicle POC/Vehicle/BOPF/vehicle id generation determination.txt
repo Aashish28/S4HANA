@@ -1,0 +1,56 @@
+class YCL_ZA_D_GENERATE_VEH_ID definition
+  public
+  inheriting from /BOBF/CL_LIB_D_SUPERCL_SIMPLE
+  final
+  create public .
+
+public section.
+
+  methods /BOBF/IF_FRW_DETERMINATION~EXECUTE
+    redefinition .
+protected section.
+private section.
+ENDCLASS.
+
+
+
+CLASS YCL_ZA_D_GENERATE_VEH_ID IMPLEMENTATION.
+
+
+  method /BOBF/IF_FRW_DETERMINATION~EXECUTE.
+
+   "retrieve created data
+    data: lt_data type ytzai_veh,
+          lv_vehid TYPE char10.
+
+    io_read->retrieve( exporting iv_node = is_ctx-node_key
+                                 it_key  = it_key
+                       importing et_data = lt_data ).
+
+  WITH +both AS ( SELECT  vehid FROM  yza_t_veh   "active data
+    UNION ALL
+    SELECT  vehid FROM  yza_t_veh_d )          "draft data
+  SELECT SINGLE
+    FROM +both
+    FIELDS MAX( vehid ) AS vehid
+    INTO @lv_vehid.
+
+    loop at lt_data reference into data(ls_data).
+        if ls_data->vehid is INITIAL.
+        "set default values
+        lv_vehid = lv_vehid + 1.
+        CONDENSE lv_vehid.
+        ls_data->vehid = lv_vehid.
+        ENDIF.
+        if ls_data->vehstatus is INITIAL.
+            ls_data->vehstatus = 'N'.
+        endif.
+    ENDLOOP.
+
+      "update draft
+        io_modify->update( iv_node = is_ctx-node_key
+                           iv_key  = ls_data->key
+                           is_data = ls_data ).
+
+  endmethod.
+ENDCLASS.

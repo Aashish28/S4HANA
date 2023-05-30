@@ -1,0 +1,103 @@
+CLASS lhc_Fule DEFINITION INHERITING FROM cl_abap_behavior_handler.
+  PRIVATE SECTION.
+
+    METHODS fuel_availability FOR DETERMINE ON MODIFY
+      IMPORTING keys FOR Fule~fuel_availability.
+    METHODS carbon_emission FOR VALIDATE ON SAVE
+      IMPORTING keys FOR Fule~carbon_emission.
+    METHODS get_instance_features FOR INSTANCE FEATURES
+      IMPORTING keys REQUEST requested_features FOR Fule RESULT result.
+    METHODS set_fuel_available FOR MODIFY
+      IMPORTING keys FOR ACTION fule~set_fuel_available RESULT result.
+
+ENDCLASS.
+
+CLASS lhc_Fule IMPLEMENTATION.
+
+  METHOD fuel_availability.
+   READ ENTITIES OF zi_fule_m IN LOCAL MODE
+    ENTITY Fule
+     FIELDS ( FtID Available )
+     WITH CORRESPONDING #(  keys )
+    RESULT DATA(lt_fueltype)
+    failed data(lt_fueltype_failed)
+    reported data(lt_fueltype_reported).
+
+    LOOP AT keys INTO DATA(ls_key).
+        MODIFY ENTITIES OF zi_fule_m  IN LOCAL MODE
+          ENTITY Fule
+          UPDATE FROM value #( for ls_fueltype in lt_fueltype (
+            FtID = ls_fueltype-FtID
+            Available = 'N' " Not available
+            %control-Available = if_abap_behv=>mk-on
+          ) ).
+    ENDLOOP.
+
+  ENDMETHOD.
+
+  METHOD carbon_emission.
+   READ ENTITIES OF zi_fule_m IN LOCAL MODE
+    ENTITY Fule
+     FIELDS ( FtID Available )
+     WITH CORRESPONDING #(  keys )
+    RESULT DATA(lt_fueltype)
+    failed data(lt_fueltype_failed)
+    reported data(lt_fueltype_reported).
+
+    LOOP AT lt_fueltype INTO DATA(ls_fueltype).
+
+       if ls_fueltype-Carbonemm is not initial and ls_fueltype-Carbonemm > 100.
+          APPEND value #( FtID = ls_fueltype-FtID ) to failed-fule.
+          APPEND value #( FtID = ls_fueltype-FtID
+                          %msg = new_message_with_text( text = 'Invalid co2/ltr'
+                          severity  = if_abap_behv_message=>severity-error )
+                          %element-Carbonemm = if_abap_behv=>mk-on
+                        ) to reported-fule.
+        endif.
+
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD get_instance_features.
+
+   READ ENTITIES OF zi_fule_m IN LOCAL MODE
+    ENTITY Fule
+        fields ( FtID Available ) with value #( for keyval in keys ( %key = keyval-%key ) )
+        result data(lt_fueltype).
+
+        result = value #( for ls_fueltype in lt_fueltype (
+                %key = ls_fueltype-%key
+                %features-%delete = cond #( when ls_fueltype-Available eq 'Y'
+                                    then if_abap_behv=>fc-o-disabled
+                                  else if_abap_behv=>fc-o-enabled
+                                )
+                "%features-%action-set_fuel_available = cond #( when ls_fueltype-Available eq 'Y'
+                 "                   then if_abap_behv=>fc-o-disabled
+                 "                 else if_abap_behv=>fc-o-enabled
+                 "               )
+        ) ).
+  ENDMETHOD.
+
+  METHOD set_fuel_available.
+  " Modify in local mode
+    MODIFY ENTITIES OF zi_fule_m IN LOCAL MODE
+           ENTITY Fule
+              UPDATE FROM VALUE #( for key in keys ( FtID = key-FtID
+                                                     Available = 'Y' " yes
+                                                     %control-Available = if_abap_behv=>mk-on ) )
+           FAILED   failed
+           REPORTED reported.
+
+    " Read changed data for action result
+    READ ENTITIES OF zi_fule_m IN LOCAL MODE
+         ENTITY Fule
+           ALL FIELDS WITH
+             VALUE #( FOR key IN keys ( FtID = key-FtID ) )
+         RESULT DATA(lt_fueltype).
+
+    result = VALUE #( FOR ls_fueltype IN lt_fueltype ( FtID = ls_fueltype-FtID
+                                                %param    = ls_fueltype ) ).
+
+  ENDMETHOD.
+
+ENDCLASS.

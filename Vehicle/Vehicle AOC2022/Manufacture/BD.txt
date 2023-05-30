@@ -1,0 +1,30 @@
+unmanaged;
+
+define behavior for ZI_MANF_UM alias Manf
+implementation in class ZBP_I_Manf_UM unique
+etag master LastChangedAt
+lock master
+
+{
+  field ( readonly )
+   MfID;
+  field ( mandatory ) Mfname;
+  field ( readonly )
+   LocalLastChangedBy , LocalLastChangedAt, LocalCreatedAt , LocalCreatedBy;
+
+  create;
+  update;
+  delete;
+
+  mapping for ZAA_T_MF control ZSManf_X_UM
+  {
+    MfID = MFID;
+    Mfname = MFNAME;
+    Country = COUNTRY;
+    LocalCreatedBy = LOCAL_CREATED_BY;
+    LocalCreatedAt = LOCAL_CREATED_AT;
+    LocalLastChangedBy = LOCAL_LAST_CHANGED_BY;
+    LocalLastChangedAt = LOCAL_LAST_CHANGED_AT;
+    LastChangedAt = LAST_CHANGED_AT;
+  }
+}

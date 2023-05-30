@@ -1,0 +1,34 @@
+@AbapCatalog.sqlViewName: 'YZA_CVEHTYPE'
+@AbapCatalog.compiler.compareFilter: true
+@AbapCatalog.preserveKey: true
+@AccessControl.authorizationCheck: #CHECK
+@EndUserText.label: 'Vehicle type consumption view'
+
+@ObjectModel: {
+transactionalProcessingDelegated: true,
+createEnabled: true,
+updateEnabled: true,
+deleteEnabled: 'EXTERNAL_CALCULATION',
+semanticKey: ['VehicleType']
+}
+
+@OData.publish: true
+
+@Metadata.allowExtensions: true
+
+define view YZA_C_VEHTYPE as select from YZA_I_VEHTYPE {
+    //YZA_I_VEHTYPE
+    @ObjectModel.mandatory: true
+    key vtype as VehicleType,
+    @ObjectModel.mandatory: true
+    vtypedesc as VehicleTypeText,
+    @ObjectModel.readOnly: true
+    case readytouse 
+        when 'X' then 'YES'
+        else 'NO' 
+    end as ReadyToUse,
+    crea_date_time,
+    crea_uname,
+    lchg_date_time,
+    lchg_uname
+}

@@ -1,0 +1,36 @@
+managed;
+
+define behavior for ZI_VEHTYP_M alias Vehtyp
+implementation in class ZBP_I_Vehtyp_M unique
+persistent table ZAA_T_VEHTYPE
+etag master LastChangedAt
+lock master
+
+{
+  field ( readonly )
+   VtInternal , Totalcount;
+
+  field ( numbering : managed )
+   VtUUID;
+
+  field ( mandatory ) Vtfname;
+
+  create;
+  update;
+  delete;
+
+  mapping for ZAA_T_VEHTYPE
+  {
+    VtUUID = VT_UUID;
+    VtInternal = VT_INTERNAL;
+    Vtfname = VTFNAME;
+    Totalcount = TOTALCOUNT;
+    LocalCreatedBy = LOCAL_CREATED_BY;
+    LocalCreatedAt = LOCAL_CREATED_AT;
+    LocalLastChangedBy = LOCAL_LAST_CHANGED_BY;
+    LocalLastChangedAt = LOCAL_LAST_CHANGED_AT;
+    LastChangedAt = LAST_CHANGED_AT;
+  }
+
+  determination CalculateVtInternal on save { create; }
+}

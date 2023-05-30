@@ -1,0 +1,110 @@
+@Metadata.layer: #CUSTOMER
+@UI: {
+  headerInfo: {
+    typeName: 'Fule', 
+    typeNamePlural: 'Fules', 
+    title: {
+      type: #STANDARD, 
+      label: 'Fule', 
+      value: 'FtID'
+    }
+  }, 
+  presentationVariant: [ {
+    sortOrder: [ {
+      by: 'FtID', 
+      direction: #DESC
+    } ], 
+    visualizations: [ {
+      type: #AS_LINEITEM
+    } ]
+  } ]
+}
+annotate view ZC_FULE_M with
+{
+  @UI.facet: [ {
+    id: 'idCollection', 
+    type: #COLLECTION, 
+    label: 'Fule', 
+    position: 10 
+  }, 
+  {
+    id: 'idIdentification', 
+    parentId: 'idCollection', 
+    type: #IDENTIFICATION_REFERENCE, 
+    label: 'General Information', 
+    position: 10 
+  } ]
+  @UI.lineItem: [ {
+    position: 10 , 
+    importance: #HIGH
+  } ]
+  @UI.identification: [ {
+    position: 10 
+  } ]
+  @UI.selectionField: [ {
+    position: 10 
+  } ]
+  FtID;
+  
+  @UI.lineItem: [ {
+    position: 20 , 
+    importance: #HIGH, 
+    label: 'Fuel Name'
+  } ]
+  @UI.identification: [ {
+    position: 20 , 
+    label: 'Fuel Name'
+  } ]
+  Ftname;
+  
+  @UI.lineItem: [ {
+    position: 30 , 
+    importance: #HIGH
+  } ]
+  @UI.identification: [ {
+    position: 30 
+  } ]
+  Price;
+  
+  @UI.selectionField: [ {
+    position: 40 
+  } ]
+  Currencycode;
+  
+  @UI.lineItem: [ { type: #FOR_ACTION , dataAction: 'set_fuel_available', label: 'Set Available',
+    importance: #HIGH,
+    position: 50     
+   } ]
+  @UI.identification: [ {
+    position: 50 , 
+    label: 'Available'
+  } ]
+  @EndUserText.label: 'Available'
+  Available;
+  
+  @UI.lineItem: [ {
+    position: 60 , 
+    importance: #HIGH, 
+    label: 'Co2/ltr'
+  } ]
+  @UI.identification: [ {
+    position: 60 , 
+    label: 'Carbon Emission/ltr'
+  } ]
+  Carbonemm;
+  
+  @UI.hidden: true
+  LocalCreatedBy;
+  
+  @UI.hidden: true
+  LocalCreatedAt;
+  
+  @UI.hidden: true
+  LocalLastChangedBy;
+  
+  @UI.hidden: true
+  LocalLastChangedAt;
+  
+  @UI.hidden: true
+  LastChangedAt;
+}

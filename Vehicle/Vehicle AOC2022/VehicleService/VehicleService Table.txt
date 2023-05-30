@@ -1,0 +1,32 @@
+@EndUserText.label : 'Vehicle Service Table'
+@AbapCatalog.enhancement.category : #EXTENSIBLE_CHARACTER_NUMERIC
+@AbapCatalog.tableCategory : #TRANSPARENT
+@AbapCatalog.deliveryClass : #A
+@AbapCatalog.dataMaintenance : #ALLOWED
+define table zaa_t_vehsrv {
+  key client            : abap.clnt not null;
+  key vehsrv_uuid       : sysuuid_x16 not null;
+  veh_uuid              : sysuuid_x16 not null;
+  @EndUserText.label : 'Vehicle Service Id'
+  vehsrv_internal       : abap.int4;
+  @EndUserText.label : 'Service Center'
+  srvcenter             : abap.int4;
+  @EndUserText.label : 'Service Tsype'
+  srvtype               : abap.char(1);
+  @EndUserText.label : 'Agent Id'
+  agentid               : abap.int4;
+  @Semantics.amount.currencyCode : 'zaa_t_vehsrv.currencycode'
+  totalprice            : /dmo/total_price;
+  currencycode          : /dmo/currency_code;
+  @EndUserText.label : 'Service Start Date'
+  srvstartdate          : abap.dats;
+  @EndUserText.label : 'Service Start Date'
+  srvenddate            : abap.dats;
+  overallstatus         : /dmo/overall_status;
+  reason                : abap.char(20);
+  local_created_by      : abp_creation_user;
+  local_created_at      : abp_creation_tstmpl;
+  local_last_changed_by : abp_locinst_lastchange_user;
+  local_last_changed_at : abp_locinst_lastchange_tstmpl;
+  last_changed_at       : abp_lastchange_tstmpl;
+}

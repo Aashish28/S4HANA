@@ -1,0 +1,21 @@
+@EndUserText.label : 'Fuel Type'
+@AbapCatalog.enhancement.category : #EXTENSIBLE_CHARACTER_NUMERIC
+@AbapCatalog.tableCategory : #TRANSPARENT
+@AbapCatalog.deliveryClass : #A
+@AbapCatalog.dataMaintenance : #RESTRICTED
+define table zaa_t_fueltype {
+  key client            : abap.clnt not null;
+  key ftid              : zaa_de_fueltype not null;
+  @EndUserText.label : 'Fuel Name'
+  ftname                : abap.char(20);
+  @Semantics.amount.currencyCode : 'zaa_t_fueltype.currencycode'
+  price                 : /dmo/total_price;
+  currencycode          : /dmo/currency_code;
+  available             : abap.char(1);
+  carbonemm             : abap.int4;
+  local_created_by      : abp_creation_user;
+  local_created_at      : abp_creation_tstmpl;
+  local_last_changed_by : abp_locinst_lastchange_user;
+  local_last_changed_at : abp_locinst_lastchange_tstmpl;
+  last_changed_at       : abp_lastchange_tstmpl;
+}
